@@ -13,7 +13,8 @@ func TestBitstringMultiplication(t *testing.T) {
 		b string
 		c string
 	}{
-		// {"1010", "1010", "1010"},
+		{"1010", "1", "1010"},
+		{"1101", "1011", "1111111"},
 	}
 	for _, td := range tt {
 		t.Run(
@@ -21,8 +22,8 @@ func TestBitstringMultiplication(t *testing.T) {
 			func(t *testing.T) {
 				a, _ := bitstrings.FromString(td.a)
 				b, _ := bitstrings.FromString(td.b)
-				if res, err := bitstrings.BitMul(a, b); err != nil || res.String() != td.c {
-					t.Fatalf("\nGot:  %s, \nWant: %s, \nError: %s", res, td.c, err)
+				if res := bitstrings.BitMul(a, b); res.String() != td.c {
+					t.Fatalf("\nGot:  %s, \nWant: %s", res, td.c)
 				}
 			},
 		)

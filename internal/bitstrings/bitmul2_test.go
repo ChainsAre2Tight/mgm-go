@@ -77,3 +77,23 @@ func TestBitMulRaw(t *testing.T) {
 		)
 	}
 }
+
+func TestFirstNonZero(t *testing.T) {
+	tt := []struct {
+		in  uint64
+		out int
+	}{
+		{5, 3},
+		{128, 8},
+	}
+	for _, td := range tt {
+		t.Run(
+			fmt.Sprintf("%d -> %d", td.in, td.out),
+			func(t *testing.T) {
+				if res := firstNonZeroBit(td.in); res != td.out {
+					t.Fatalf("\nGot:  %d, \nWant: %d", res, td.out)
+				}
+			},
+		)
+	}
+}

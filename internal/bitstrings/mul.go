@@ -2,15 +2,46 @@ package bitstrings
 
 import "fmt"
 
-func BitMul(a, b *BitString128) (*BitString128, error) {
+func BitMul(a, b *BitString128) *BitString128 {
+	if a.lower == 0 && a.upper == 0 || b.lower == 0 && b.upper == 0 {
+		return &BitString128{
+			length: 0,
+			upper:  0,
+			lower:  0,
+		}
+	}
 	// calcualte full, 256 bit multiplication result
 	raw := bitMulPreRemainder(a, b)
 
 	// bring result back into the field
 	// by calculating the remainder
-	fmt.Println(raw)
+	upper, lower := bitMulRemainder(raw)
 
-	return nil, fmt.Errorf("not implemented")
+	// find first non-zero bit to calculate lesngth
+	var length int
+	if upper > 0 {
+		length = firstNonZeroBit(upper) + 64
+	} else if lower > 0 {
+		length = firstNonZeroBit(lower)
+	} else {
+		length = 0
+	}
+
+	return &BitString128{
+		length: length,
+		upper:  upper,
+		lower:  lower,
+	}
+}
+
+func firstNonZeroBit(n uint64) int {
+	fmt.Println(n)
+	for i := 63; i >= 0; i-- {
+		if n&uint64(1<<i) > 0 {
+			return i + 1
+		}
+	}
+	return 0
 }
 
 func bitMulPreRemainder(a, b *BitString128) []uint64 {
@@ -40,4 +71,34 @@ func bitMulPreRemainder(a, b *BitString128) []uint64 {
 	}
 
 	return res
+}
+
+type galoisGenPolynomial struct {
+	high uint64 // x^128
+	low  uint64 // x^7+x^2+x+1
+}
+
+var GaloisGenPolynomial = &galoisGenPolynomial{
+	high: 1,                                  // x^128
+	low:  (1 << 7) + (1 << 2) + (1 << 1) + 1, // x^7+x^2+x+1
+}
+
+func bitMulRemainder(raw []uint64) (upper, lower uint64) {
+	if len(raw) != 4 {
+		panic(fmt.Sprintf("bitstrings.bitMulRemainder: unexpected multiplication slice length, expected 4, got %d", len(raw)))
+	}
+
+	upper = raw[2]
+	lower = raw[3]
+
+	for i := 63; i >= 0; i-- {
+		if raw[0]&1<<i > 0 {
+			upper ^= GaloisGenPolynomial.low << i
+		}
+		if raw[1]&1<<i > 0 {
+			lower ^= GaloisGenPolynomial.low << i
+		}
+	}
+
+	return upper, lower
 }
