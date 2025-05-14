@@ -7,7 +7,7 @@ import (
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 )
 
-func TestBitSum(t *testing.T) {
+func TestBitSumFromString(t *testing.T) {
 	tt := []struct {
 		a string
 		b string
