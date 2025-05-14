@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestBitMulRaw(t *testing.T) {
+func TestBitMulRawFromStrings(t *testing.T) {
 	tt := []struct {
 		a string
 		b string
@@ -35,7 +35,7 @@ func TestBitMulRaw(t *testing.T) {
 	}
 }
 
-func TestBitSum(t *testing.T) {
+func TestBitMulRaw(t *testing.T) {
 	tt := []struct {
 		upperA, lowerA uint64
 		upperB, lowerB uint64
