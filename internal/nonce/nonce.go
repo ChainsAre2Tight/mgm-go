@@ -2,6 +2,8 @@ package nonce
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -17,9 +19,31 @@ func (n *Nonce) String() string {
 	return fmt.Sprintf("%0.16x%0.16x", n.upper, n.lower)
 }
 
-// func FromString(str string) *Nonce {
+func FromString(str string) (*Nonce, error) {
+	fail := func(err error) (*Nonce, error) {
+		return nil, fmt.Errorf("nonce.FromString: %s", err)
+	}
 
-// }
+	if l := len(str); l > 32 {
+		return fail(fmt.Errorf("string to long (%d > 32)", l))
+	} else if l < 32 {
+		str = strings.Repeat("0", 32-l) + str
+	}
+
+	upper, err := strconv.ParseInt(str[0:16], 16, 64)
+	if err != nil {
+		return fail(fmt.Errorf("upper: %s", err))
+	}
+	lower, err := strconv.ParseInt(str[16:32], 16, 64)
+	if err != nil {
+		return fail(fmt.Errorf("lower: %s", err))
+	}
+
+	return &Nonce{
+		upper: uint64(upper),
+		lower: uint64(lower),
+	}, nil
+}
 
 type NonceGenerator struct {
 	counterUpper uint64
