@@ -33,8 +33,6 @@ func (e *encryptor) Encrypt(
 
 	// get nonce
 
-	// create MAC
-
 	// step 1: sign associated data
 	// use nonce and convert 1||nonce to []byte
 	// encrypt this nonce
