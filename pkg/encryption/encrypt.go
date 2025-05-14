@@ -27,8 +27,6 @@ func (e *encryptor) Encrypt(
 	mac string,
 	err error,
 ) {
-	panic("unimplemented")
-
 	// schedule keys
 
 	// get nonce
@@ -52,4 +50,5 @@ func (e *encryptor) Encrypt(
 	// step 3: multiply and xor len(a) || len(c)
 
 	// step 4: Encrypt cumulative result, taking first S bits from it
+	panic("unimplemented")
 }
