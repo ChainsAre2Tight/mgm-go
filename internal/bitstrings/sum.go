@@ -1,9 +1,9 @@
 package bitstrings
 
-func BitSum(a, b *bitString) (*bitString, error) {
+func BitSum128(a, b *BitString128) (*BitString128, error) {
 	length := max(a.Length(), b.Length())
 
-	return &bitString{
+	return &BitString128{
 		length: length,
 		lower:  a.lower ^ b.lower,
 		upper:  a.upper ^ b.upper,

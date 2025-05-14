@@ -6,29 +6,28 @@ import (
 	"github.com/ChainsAre2Tight/mgm-go/internal/interfaces"
 )
 
-var _ interfaces.BitString = (*bitString)(nil)
+var _ interfaces.BitString = (*BitString128)(nil)
+var _ fmt.Stringer = (*BitString128)(nil)
 
-// var _ fmt.Stringer = (*bitString)(nil)
-
-type bitString struct {
+type BitString128 struct {
 	length int
 	upper  uint64
 	lower  uint64
 }
 
 // String implements fmt.Stringer.
-func (bs *bitString) String() string {
+func (bs *BitString128) String() string {
 	return fmt.Sprintf("%0.64b%0.64b", bs.upper, bs.lower)[128-bs.length:]
 }
 
 // Length implements interfaces.BitString.
-func (bs *bitString) Length() int {
+func (bs *BitString128) Length() int {
 	return bs.length
 }
 
-func FromString(str string) (*bitString, error) {
-	fail := func(err error) (*bitString, error) {
-		return nil, fmt.Errorf("bitstrings.FromString: %s", err)
+func FromString(str string) (*BitString128, error) {
+	fail := func(err error) (*BitString128, error) {
+		return nil, fmt.Errorf("BitString128s.FromString: %s", err)
 	}
 	if l := len(str); l > 128 {
 		return fail(fmt.Errorf("exceeded maximum bitsring length (%d > 128)", l))
@@ -49,7 +48,7 @@ func FromString(str string) (*bitString, error) {
 			return fail(fmt.Errorf("unsupported characted %s of string %s at position %d", string(r), str, len(str)-i-1))
 		}
 	}
-	return &bitString{
+	return &BitString128{
 		length: len(str),
 		upper:  upper,
 		lower:  lower,

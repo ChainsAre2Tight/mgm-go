@@ -1,9 +1,6 @@
 package interfaces
 
-import "fmt"
-
-// Represents a 128-bit string
+// Represents a bit string of a certain length
 type BitString interface {
-	fmt.Stringer
 	Length() int
 }

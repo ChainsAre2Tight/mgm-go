@@ -24,7 +24,7 @@ func TestBitSum(t *testing.T) {
 			func(t *testing.T) {
 				bs_a, _ := bitstrings.FromString(td.a)
 				bs_b, _ := bitstrings.FromString(td.b)
-				if res, err := bitstrings.BitSum(bs_a, bs_b); err != nil || res.String() != td.c {
+				if res, err := bitstrings.BitSum128(bs_a, bs_b); err != nil || res.String() != td.c {
 					t.Fatalf("\nGot:  %s, \nWant: %s, \nError: %s", res, td.c, err)
 				}
 			},
