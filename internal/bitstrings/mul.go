@@ -23,8 +23,8 @@ func bitMulPreRemainder(a, b *BitString128) []uint64 {
 	for i := range 64 {
 		if (1<<i)&a.lower > 0 {
 			lower = b.lower << i
-			middle = (b.lower >> (128 - i)) + (b.upper << i)
-			upper = b.upper >> (128 - i)
+			middle = (b.lower >> (64 - i)) + (b.upper << i)
+			upper = b.upper >> (64 - i)
 
 			res[3] ^= lower
 			res[2] ^= middle
@@ -35,8 +35,8 @@ func bitMulPreRemainder(a, b *BitString128) []uint64 {
 	for i := range 64 {
 		if (1<<i)&a.upper > 0 {
 			lower = b.lower << i
-			middle = (b.lower >> (128 - i)) + (b.upper << i)
-			upper = b.upper >> (128 - i)
+			middle = (b.lower >> (64 - i)) + (b.upper << i)
+			upper = b.upper >> (64 - i)
 
 			res[2] ^= lower
 			res[1] ^= middle
