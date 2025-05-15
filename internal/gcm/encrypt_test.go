@@ -15,6 +15,7 @@ func TestEncryptBitString(t *testing.T) {
 		resU, resL   uint64
 	}{
 		{"12345678901234567890123456789012", 1, 2, 15496575308278909952, 9583859517063235840},
+		{"12345678901234567890123456789012", 2, 2, 18232385423786432256, 1356391677369709056},
 	}
 	for _, td := range tt {
 		t.Run(
@@ -33,7 +34,7 @@ func TestEncryptBitString(t *testing.T) {
 					t.Fatalf("Error during encryption: %s", err)
 				}
 				if td.resU != bs.Upper() || td.resL != bs.Lower() {
-					t.Fatalf("\nGot:  %x | %x, \nWant: %x | %x", bs.Upper(), bs.Lower(), td.resU, td.resL)
+					t.Fatalf("\nGot:  %d | %d, \nWant: %d | %d", bs.Upper(), bs.Lower(), td.resU, td.resL)
 				}
 			},
 		)

@@ -12,20 +12,21 @@ import (
 )
 
 func Seed(
-	iv interfaces.BitString,
+	iv bitstrings.BitString128,
 	depth int,
-	increment func(interfaces.BitString),
+	increment func(*bitstrings.BitString128),
 	keys *kt.RoundKeys,
 	ctx context.Context,
-) ([]interfaces.BitString, error) {
-	fail := func(err error) ([]interfaces.BitString, error) {
+) ([]*bitstrings.BitString128, error) {
+	fail := func(err error) ([]*bitstrings.BitString128, error) {
 		return nil, fmt.Errorf("gcm.Seed: %s", err)
 	}
 
-	result := make([]interfaces.BitString, depth)
+	result := make([]*bitstrings.BitString128, depth)
 	for i := range result {
-		increment(iv)
-		result[i] = iv
+		increment(&iv)
+		new := iv
+		result[i] = &new
 	}
 
 	errs, _ := errgroup.WithContext(ctx)
@@ -46,7 +47,7 @@ func Seed(
 		return fail(fmt.Errorf("parallel encryption: %s", err))
 	}
 
-	panic("unimplemented")
+	return result, nil
 }
 
 func encryptBitString(
