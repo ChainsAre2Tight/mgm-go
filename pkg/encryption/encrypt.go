@@ -1,8 +1,12 @@
 package encryption
 
 import (
+	"fmt"
+
+	"github.com/ChainsAre2Tight/kuznechik-go/pkg/keyschedule"
 	"github.com/ChainsAre2Tight/mgm-go/internal/interfaces"
 	"github.com/ChainsAre2Tight/mgm-go/internal/nonce"
+	nnce "github.com/ChainsAre2Tight/mgm-go/internal/nonce"
 )
 
 type encryptor struct {
@@ -22,14 +26,23 @@ func (e *encryptor) Encrypt(
 	associatedData string,
 	plaintext string,
 ) (
-	nonce *nonce.Nonce,
+	nonce *nnce.Nonce,
 	ciphertext string,
 	mac string,
 	err error,
 ) {
+	fail := func(err error) (*nnce.Nonce, string, string, error) {
+		return nil, "", "", fmt.Errorf("encryption.Encrypt: %s", err)
+	}
 	// schedule keys
+	keys, err := keyschedule.Schedule(key)
+	if err != nil {
+		return fail(fmt.Errorf("key schedule: %s", err))
+	}
+	_ = keys
 
 	// get nonce
+	nonce = e.ng.Nonce()
 
 	// step 1: sign associated data
 	// use nonce and convert 1||nonce to []byte

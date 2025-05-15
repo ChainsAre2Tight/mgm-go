@@ -15,6 +15,33 @@ type BitString128 struct {
 	lower  uint64
 }
 
+// Lower implements interfaces.BitString.
+func (bs *BitString128) Lower() uint64 {
+	return bs.lower
+}
+
+// Upper implements interfaces.BitString.
+func (bs *BitString128) Upper() uint64 {
+	return bs.upper
+}
+
+func NewBitString(upper, lower uint64) *BitString128 {
+	return &BitString128{
+		upper: upper,
+		lower: lower,
+	}
+}
+
+// Bytes implements interfaces.BitString.
+func (bs *BitString128) Bytes() []byte {
+	result := make([]byte, 16)
+	for i := range 8 {
+		result[i] = byte((bs.upper << (8 * i)) >> 56)
+		result[i+8] = byte((bs.lower << (8 * i)) >> 56)
+	}
+	return result
+}
+
 // String implements fmt.Stringer.
 func (bs *BitString128) String() string {
 	return fmt.Sprintf("%0.64b%0.64b", bs.upper, bs.lower)[128-bs.length:]
@@ -23,6 +50,19 @@ func (bs *BitString128) String() string {
 // Length implements interfaces.BitString.
 func (bs *BitString128) Length() int {
 	return bs.length
+}
+
+func FromBytes(b []byte) *BitString128 {
+	var upper, lower uint64
+	for i := range 8 {
+		upper += uint64(b[i]) << (64 - 8*i)
+		lower += uint64(b[i+8]) << (64 - 8*i)
+	}
+
+	return &BitString128{
+		upper: upper,
+		lower: lower,
+	}
 }
 
 func FromString(str string) (*BitString128, error) {

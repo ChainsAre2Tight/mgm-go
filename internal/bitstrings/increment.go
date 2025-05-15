@@ -1,11 +1,9 @@
 package bitstrings
 
-// IncrementL implements interfaces.BitString.
-func (bs *BitString128) IncrementL() {
+func IncrementL(bs *BitString128) {
 	bs.upper++
 }
 
-// IncremtntR implements interfaces.BitString.
-func (bs *BitString128) IncremtntR() {
+func IncremtntR(bs *BitString128) {
 	bs.lower++
 }

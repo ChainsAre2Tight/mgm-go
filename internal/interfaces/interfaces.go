@@ -5,8 +5,9 @@ import "github.com/ChainsAre2Tight/mgm-go/internal/nonce"
 // Represents a bit string of a certain length
 type BitString interface {
 	Length() int
-	IncrementL()
-	IncremtntR()
+	Bytes() []byte
+	Upper() uint64
+	Lower() uint64
 }
 
 type Encryptor interface {
