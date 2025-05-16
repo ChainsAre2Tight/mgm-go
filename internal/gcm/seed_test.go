@@ -20,21 +20,16 @@ func TestSeed(t *testing.T) {
 		result    []*bitstrings.BitString128
 	}{
 		{
-			iv:        *bitstrings.NewBitString(0, 2),
-			depth:     1,
-			key:       "12345678901234567890123456789012",
-			increment: bitstrings.IncrementL,
+			iv:        *bitstrings.FromGOSTString("11 22 33 44 55 66 77 00 FF EE DD CC BB AA 99 88"),
+			depth:     5,
+			key:       "8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF",
+			increment: bitstrings.IncremtntR,
 			result: []*bitstrings.BitString128{
-				bitstrings.NewBitString(15496575308278909952, 9583859517063235840),
-			},
-		}, {
-			iv:        *bitstrings.NewBitString(0, 2),
-			depth:     2,
-			key:       "12345678901234567890123456789012",
-			increment: bitstrings.IncrementL,
-			result: []*bitstrings.BitString128{
-				bitstrings.NewBitString(15496575308278909952, 9583859517063235840),
-				bitstrings.NewBitString(18232385423786432256, 1356391677369709056),
+				bitstrings.FromGOSTString("B8 57 48 C5 12 F3 19 90 AA 56 7E F1 53 35 DB 74"),
+				bitstrings.FromGOSTString("80 64 F0 12 6F AC 9B 2C 5B 6E AC 21 61 2F 94 33"),
+				bitstrings.FromGOSTString("58 58 82 1D 40 C0 CD 0D 0A C1 E6 C2 47 09 8F 1C"),
+				bitstrings.FromGOSTString("E4 3F 50 81 B5 8F 0B 49 01 2F 8E E8 6A CD 6D FA"),
+				bitstrings.FromGOSTString("86 CE 9E 2A 0A 12 25 E3 33 56 91 B2 0D 5A 33 48"),
 			},
 		},
 	}
@@ -59,9 +54,18 @@ func TestSeed(t *testing.T) {
 					t.Fatalf("Error during seeding: %s", err)
 				}
 				if !reflect.DeepEqual(res, td.result) {
-					t.Fatalf("\nGot:  %v, \nWant: %v.", res, td.result)
+
+					t.Fatalf("\nGot:  %s, \nWant: %s.", representPointerArray(res), representPointerArray(td.result))
 				}
 			},
 		)
 	}
+}
+
+func representPointerArray(in []*bitstrings.BitString128) string {
+	res := ""
+	for _, pointer := range in {
+		res = fmt.Sprintf("%s | %d, %d", res, pointer.Upper(), pointer.Lower())
+	}
+	return fmt.Sprintf("[%s]", res)
 }

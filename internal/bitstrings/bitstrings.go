@@ -39,6 +39,7 @@ func (bs *BitString128) Bytes() []byte {
 		result[i] = byte((bs.upper << (8 * i)) >> 56)
 		result[i+8] = byte((bs.lower << (8 * i)) >> 56)
 	}
+	// fmt.Println(result)
 	return result
 }
 
@@ -55,8 +56,8 @@ func (bs *BitString128) Length() int {
 func FromBytes(b []byte) *BitString128 {
 	var upper, lower uint64
 	for i := range 8 {
-		upper += uint64(b[i]) << (64 - 8*i)
-		lower += uint64(b[i+8]) << (64 - 8*i)
+		upper += uint64(b[i]) << (56 - 8*i)
+		lower += uint64(b[i+8]) << (56 - 8*i)
 	}
 
 	return &BitString128{

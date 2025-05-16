@@ -22,11 +22,16 @@ func Seed(
 		return nil, fmt.Errorf("gcm.Seed: %s", err)
 	}
 
+	encryptedIV, err := encryptBitString(&iv, keys)
+	if err != nil {
+		return fail(fmt.Errorf("error during initial iv encryption: %s", err))
+	}
+
 	result := make([]*bitstrings.BitString128, depth)
 	for i := range result {
-		increment(&iv)
-		new := iv
+		new := *encryptedIV
 		result[i] = &new
+		increment(encryptedIV)
 	}
 
 	errs, _ := errgroup.WithContext(ctx)
