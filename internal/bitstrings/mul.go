@@ -27,6 +27,8 @@ func BitMul(a, b *BitString128) *BitString128 {
 		length = 0
 	}
 
+	fmt.Println(upper, lower)
+
 	return &BitString128{
 		length: length,
 		upper:  upper,

@@ -2,7 +2,6 @@ package bitstrings
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 )
@@ -19,7 +18,7 @@ func FromGOSTString(str string) *BitString128 {
 	if err != nil {
 		panic(fmt.Errorf("lower: %s", err))
 	}
-	fmt.Println(upper, lower, math.MaxInt64)
+	// fmt.Println(upper, lower, math.MaxInt64)
 
 	return NewBitString(uint64(upper), uint64(lower))
 }

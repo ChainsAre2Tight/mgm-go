@@ -22,7 +22,7 @@ func Seed(
 		return nil, fmt.Errorf("gcm.Seed: %s", err)
 	}
 
-	encryptedIV, err := encryptBitString(&iv, keys)
+	encryptedIV, err := EncryptBitString(&iv, keys)
 	if err != nil {
 		return fail(fmt.Errorf("error during initial iv encryption: %s", err))
 	}
@@ -38,7 +38,7 @@ func Seed(
 
 	for i := range result {
 		errs.Go(func() error {
-			if new, err := encryptBitString(result[i], keys); err != nil {
+			if new, err := EncryptBitString(result[i], keys); err != nil {
 				return fmt.Errorf("error in gouroutine at %d: %s", i, err)
 			} else {
 				result[i] = new
@@ -55,7 +55,7 @@ func Seed(
 	return result, nil
 }
 
-func encryptBitString(
+func EncryptBitString(
 	target interfaces.BitString,
 	keys *kt.RoundKeys,
 ) (*bitstrings.BitString128, error) {

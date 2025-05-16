@@ -39,7 +39,7 @@ func TestEncryptBitString(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Error during keyscheduling: %s", err)
 				}
-				bs, err := encryptBitString(rawbs, keys)
+				bs, err := EncryptBitString(rawbs, keys)
 				if err != nil {
 					t.Fatalf("Error during encryption: %s", err)
 				}

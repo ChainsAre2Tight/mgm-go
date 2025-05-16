@@ -23,7 +23,7 @@ func TestSeed(t *testing.T) {
 			iv:        *bitstrings.FromGOSTString("11 22 33 44 55 66 77 00 FF EE DD CC BB AA 99 88"),
 			depth:     5,
 			key:       "8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF",
-			increment: bitstrings.IncremetntR,
+			increment: bitstrings.IncrementR,
 			result: []*bitstrings.BitString128{
 				bitstrings.FromGOSTString("B8 57 48 C5 12 F3 19 90 AA 56 7E F1 53 35 DB 74"),
 				bitstrings.FromGOSTString("80 64 F0 12 6F AC 9B 2C 5B 6E AC 21 61 2F 94 33"),
@@ -71,17 +71,9 @@ func TestSeed(t *testing.T) {
 				}
 				if !reflect.DeepEqual(res, td.result) {
 
-					t.Fatalf("\nGot:  %s, \nWant: %s.", representPointerArray(res), representPointerArray(td.result))
+					t.Fatalf("\nGot:  %s, \nWant: %s.", bitstrings.RepresentPointerArray(res), bitstrings.RepresentPointerArray(td.result))
 				}
 			},
 		)
 	}
-}
-
-func representPointerArray(in []*bitstrings.BitString128) string {
-	res := ""
-	for _, pointer := range in {
-		res = fmt.Sprintf("%s | %d, %d", res, pointer.Upper(), pointer.Lower())
-	}
-	return fmt.Sprintf("[%s]", res)
 }
