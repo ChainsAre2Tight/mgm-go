@@ -30,11 +30,11 @@ func FromString(str string) (*Nonce, error) {
 		str = strings.Repeat("0", 32-l) + str
 	}
 
-	upper, err := strconv.ParseInt(str[0:16], 16, 64)
+	upper, err := strconv.ParseUint(str[0:16], 16, 64)
 	if err != nil {
 		return fail(fmt.Errorf("upper: %s", err))
 	}
-	lower, err := strconv.ParseInt(str[16:32], 16, 64)
+	lower, err := strconv.ParseUint(str[16:32], 16, 64)
 	if err != nil {
 		return fail(fmt.Errorf("lower: %s", err))
 	}
