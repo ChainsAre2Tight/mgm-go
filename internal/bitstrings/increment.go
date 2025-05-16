@@ -4,6 +4,6 @@ func IncrementL(bs *BitString128) {
 	bs.upper++
 }
 
-func IncremtntR(bs *BitString128) {
+func IncremetntR(bs *BitString128) {
 	bs.lower++
 }
