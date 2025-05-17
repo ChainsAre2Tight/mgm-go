@@ -27,7 +27,7 @@ func BitMul(a, b *BitString128) *BitString128 {
 		length = 0
 	}
 
-	fmt.Println(upper, lower)
+	// fmt.Println(upper, lower)
 
 	return &BitString128{
 		length: length,
@@ -37,7 +37,6 @@ func BitMul(a, b *BitString128) *BitString128 {
 }
 
 func firstNonZeroBit(n uint64) int {
-	fmt.Println(n)
 	for i := 63; i >= 0; i-- {
 		if n&uint64(1<<i) > 0 {
 			return i + 1
@@ -72,6 +71,8 @@ func bitMulPreRemainder(a, b *BitString128) []uint64 {
 		}
 	}
 
+	// fmt.Println(res)
+
 	return res
 }
 
@@ -81,8 +82,8 @@ type galoisGenPolynomial struct {
 }
 
 var GaloisGenPolynomial = &galoisGenPolynomial{
-	high: 1,                                  // x^128
-	low:  (1 << 7) + (1 << 2) + (1 << 1) + 1, // x^7+x^2+x+1
+	high: 1,          // x^128
+	low:  0b10000111, // x^7+x^2+x+1
 }
 
 func bitMulRemainder(raw []uint64) (upper, lower uint64) {
@@ -93,13 +94,24 @@ func bitMulRemainder(raw []uint64) (upper, lower uint64) {
 	upper = raw[2]
 	lower = raw[3]
 
+	// fmt.Printf("        %0.64b, %0.64b\n", upper, lower)
+
 	for i := 63; i >= 0; i-- {
-		if raw[0]&1<<i > 0 {
+		if raw[0]&(1<<i) > 0 {
 			upper ^= GaloisGenPolynomial.low << i
+
+			// it is also apparantly necessary to xor overlaps with bits 128-191
+			raw[1] ^= GaloisGenPolynomial.low >> (64 - i)
+
+			// fmt.Printf("up %0.2d | %0.64b, %0.64b\n", i, upper, lower)
 		}
-		if raw[1]&1<<i > 0 {
+		if raw[1]&(1<<i) > 0 {
 			lower ^= GaloisGenPolynomial.low << i
+			upper ^= GaloisGenPolynomial.low >> (64 - i)
+
+			// fmt.Printf("lo %0.2d | %0.64b, %0.64b\n", i, upper, lower)
 		}
+
 	}
 
 	return upper, lower
