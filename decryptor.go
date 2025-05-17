@@ -63,9 +63,13 @@ func (d *decryptor) Decrypt(
 	}
 
 	// compare MACs
-	if !reflect.DeepEqual(macRaw.Bytes(), mac) {
+	if b := macRaw.Bytes(); !reflect.DeepEqual(b, mac) {
 		// TODO add custom exception
-		return fail(fmt.Errorf("MACs differ"))
+		return fail(&ErrMACsDiffer{
+			err:       "",
+			Computed:  b,
+			Presented: mac,
+		})
 	}
 
 	// decrypt ciphertext
