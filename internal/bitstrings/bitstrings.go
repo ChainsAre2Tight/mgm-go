@@ -55,6 +55,13 @@ func (bs *BitString128) Length() int {
 
 func FromBytes(b []byte) *BitString128 {
 	var upper, lower uint64
+
+	if len(b) < 16 {
+		temp := make([]byte, 16)
+		copy(temp, b)
+		b = temp
+	}
+
 	for i := range 8 {
 		upper += uint64(b[i]) << (56 - 8*i)
 		lower += uint64(b[i+8]) << (56 - 8*i)
