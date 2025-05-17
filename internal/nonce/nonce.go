@@ -4,24 +4,27 @@ import (
 	"sync"
 
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
-	"github.com/ChainsAre2Tight/mgm-go/internal/interfaces"
 )
 
-type NonceGenerator struct {
+type NonceGenerator interface {
+	Nonce() *bitstrings.BitString128
+}
+
+type nonceGenerator struct {
 	counterUpper uint64
 	counterLower uint64
 	mu           *sync.Mutex
 }
 
-func NewNonceGenerator() *NonceGenerator {
-	return &NonceGenerator{
+func NewNonceGenerator() *nonceGenerator {
+	return &nonceGenerator{
 		counterUpper: 0,
 		counterLower: 0,
 		mu:           &sync.Mutex{},
 	}
 }
 
-func (ng *NonceGenerator) Nonce() interfaces.BitString {
+func (ng *nonceGenerator) Nonce() *bitstrings.BitString128 {
 	ng.mu.Lock()
 	defer ng.mu.Unlock()
 

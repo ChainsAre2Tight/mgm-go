@@ -1,4 +1,4 @@
-package mac
+package maccomputation
 
 import (
 	"context"

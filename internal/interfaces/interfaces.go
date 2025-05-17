@@ -7,16 +7,3 @@ type BitString interface {
 	Upper() uint64
 	Lower() uint64
 }
-
-type Encryptor interface {
-	Encrypt(
-		key string,
-		associatedData string,
-		plaintext string,
-	) (
-		nonce BitString,
-		ciphertext string,
-		mac string,
-		err error,
-	)
-}
