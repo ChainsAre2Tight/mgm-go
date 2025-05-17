@@ -9,19 +9,19 @@ import (
 	"github.com/ChainsAre2Tight/mgm-go/internal/gcm"
 )
 
-func Encypt(
-	plaintext []*bitstrings.BitString128,
+func Decypt(
+	ciphertext []*bitstrings.BitString128,
 	keys *types.RoundKeys,
 	nonce *bitstrings.BitString128,
 	ctx context.Context,
 ) ([]*bitstrings.BitString128, error) {
 	fail := func(err error) ([]*bitstrings.BitString128, error) {
-		return nil, fmt.Errorf("encrypt.Encrypt: %s", err)
+		return nil, fmt.Errorf("encrypt.Decrypt: %s", err)
 	}
 
 	gamma, err := gcm.Seed(
 		*nonce,
-		len(plaintext),
+		len(ciphertext),
 		bitstrings.IncrementR,
 		keys,
 		ctx,
@@ -33,7 +33,7 @@ func Encypt(
 
 	result := make([]*bitstrings.BitString128, len(gamma))
 	for i := range gamma {
-		result[i] = bitstrings.BitSum128(gamma[i], plaintext[i])
+		result[i] = bitstrings.BitSum128(gamma[i], ciphertext[i])
 	}
 
 	return result, nil

@@ -11,12 +11,12 @@ import (
 	"github.com/ChainsAre2Tight/mgm-go/internal/encryption"
 )
 
-func TestEncrypt(t *testing.T) {
+func TestDecrypt(t *testing.T) {
 	tt := []struct {
 		key        string
 		nonce      *bitstrings.BitString128
-		plaintext  []*bitstrings.BitString128
 		ciphertext []*bitstrings.BitString128
+		plaintext  []*bitstrings.BitString128
 	}{
 		{
 			key:   "8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF",
@@ -37,16 +37,16 @@ func TestEncrypt(t *testing.T) {
 	}
 	for _, td := range tt {
 		t.Run(
-			fmt.Sprintf("%s, %s | %v -> %v", td.key, td.nonce, td.plaintext, td.ciphertext),
+			fmt.Sprintf("%s, %s | %v -> %v", td.key, td.nonce, td.ciphertext, td.plaintext),
 			func(t *testing.T) {
 				keys, err := keyschedule.Schedule(td.key)
 				if err != nil {
 					t.Fatalf("error during keyschedule: %s", err)
 				}
-				if res, err := encryption.Encypt(td.plaintext, keys, td.nonce, context.Background()); err != nil {
-					t.Fatalf("error during encryption: %s", err)
-				} else if !reflect.DeepEqual(td.ciphertext, res) {
-					t.Fatalf("\nGot:  %s, \nWant: %s", bitstrings.RepresentPointerArray(res), bitstrings.RepresentPointerArray(td.ciphertext))
+				if res, err := encryption.Decypt(td.ciphertext, keys, td.nonce, context.Background()); err != nil {
+					t.Fatalf("error during decryption: %s", err)
+				} else if !reflect.DeepEqual(td.plaintext, res) {
+					t.Fatalf("\nGot:  %s, \nWant: %s", bitstrings.RepresentPointerArray(res), bitstrings.RepresentPointerArray(td.plaintext))
 				}
 			},
 		)
