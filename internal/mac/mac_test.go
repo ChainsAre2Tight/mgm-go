@@ -1,4 +1,4 @@
-package encryption
+package mac_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/ChainsAre2Tight/kuznechik-go/pkg/keyschedule"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
+	"github.com/ChainsAre2Tight/mgm-go/internal/mac"
 )
 
 func TestMAC(t *testing.T) {
@@ -46,7 +47,7 @@ func TestMAC(t *testing.T) {
 				if err != nil {
 					t.Fatalf("error during keyschedule: %s", err)
 				}
-				res, err := computeMAC(
+				res, err := mac.Compute(
 					keys,
 					td.nonce,
 					td.authenticatedData,

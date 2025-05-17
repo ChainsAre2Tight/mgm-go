@@ -1,4 +1,4 @@
-package encryption
+package encryption_test
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/ChainsAre2Tight/kuznechik-go/pkg/keyschedule"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
+	"github.com/ChainsAre2Tight/mgm-go/internal/encryption"
 )
 
 func TestEncryptPlaintext(t *testing.T) {
@@ -42,7 +43,7 @@ func TestEncryptPlaintext(t *testing.T) {
 				if err != nil {
 					t.Fatalf("error during keyschedule: %s", err)
 				}
-				if res, err := encyptPlaintext(td.plaintext, keys, td.nonce, context.Background()); err != nil {
+				if res, err := encryption.Encypt(td.plaintext, keys, td.nonce, context.Background()); err != nil {
 					t.Fatalf("error during encryption: %s", err)
 				} else if !reflect.DeepEqual(td.result, res) {
 					t.Fatalf("\nGot:  %s, \nWant: %s", bitstrings.RepresentPointerArray(res), bitstrings.RepresentPointerArray(td.result))
