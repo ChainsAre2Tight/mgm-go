@@ -12,4 +12,16 @@ type Encryptor interface {
 		err error,
 	)
 }
-type Decryptor interface{}
+
+type Decryptor interface {
+	Decrypt(
+		key string,
+		nonce []byte,
+		associatedData []byte,
+		ciphertext []byte,
+		mac []byte,
+	) (
+		plaintext []byte,
+		err error,
+	)
+}
