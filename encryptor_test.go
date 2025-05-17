@@ -7,7 +7,6 @@ import (
 
 	mgmgo "github.com/ChainsAre2Tight/mgm-go"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
-	"github.com/ChainsAre2Tight/mgm-go/internal/nonce"
 )
 
 type NonceGeneratorMock struct{}
@@ -19,7 +18,7 @@ func (n *NonceGeneratorMock) Nonce() *bitstrings.BitString128 {
 	return Nonce
 }
 
-var _ nonce.NonceGenerator = (*NonceGeneratorMock)(nil)
+var _ mgmgo.NonceGenerator = (*NonceGeneratorMock)(nil)
 
 func TestEncryptor(t *testing.T) {
 	tt := []struct {

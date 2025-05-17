@@ -1,4 +1,4 @@
-package nonce
+package mgmgo
 
 import (
 	"sync"

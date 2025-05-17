@@ -8,17 +8,16 @@ import (
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 	"github.com/ChainsAre2Tight/mgm-go/internal/encryption"
 	"github.com/ChainsAre2Tight/mgm-go/internal/maccomputation"
-	"github.com/ChainsAre2Tight/mgm-go/internal/nonce"
 )
 
 var _ Encryptor = (*encryptor)(nil)
 
 type encryptor struct {
-	ng nonce.NonceGenerator
+	ng NonceGenerator
 }
 
 func NewEncryptor(
-	ng nonce.NonceGenerator,
+	ng NonceGenerator,
 ) *encryptor {
 	return &encryptor{
 		ng: ng,
@@ -67,8 +66,6 @@ func (e *encryptor) Encrypt(
 			return fail(fmt.Errorf("MSB: %s", err))
 		}
 	}
-
-	fmt.Println(bitstrings.RepresentPointerArray(ciphertextArray))
 
 	// compute MAC
 	macRaw, err := maccomputation.Compute(
