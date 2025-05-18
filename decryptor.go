@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/ChainsAre2Tight/kuznechik-go/pkg/keyschedule"
+	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 	"github.com/ChainsAre2Tight/mgm-go/internal/encryption"
 	"github.com/ChainsAre2Tight/mgm-go/internal/maccomputation"
@@ -21,7 +21,7 @@ func NewDecryptor() *decryptor {
 
 // Decrypt implements Decryptor.
 func (d *decryptor) Decrypt(
-	key string,
+	key []byte,
 	nonce []byte,
 	associatedData []byte,
 	ciphertext []byte,
@@ -36,7 +36,7 @@ func (d *decryptor) Decrypt(
 		return nil, fmt.Errorf("decryptor.Decrypt: %s", err)
 	}
 	// schedule keys
-	keys, err := keyschedule.Schedule(key)
+	keys, err := kuznechikgo.Schedule(key)
 	if err != nil {
 		return fail(fmt.Errorf("key schedule: %s", err))
 	}

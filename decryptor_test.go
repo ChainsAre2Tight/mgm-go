@@ -1,6 +1,7 @@
 package mgmgo_test
 
 import (
+	"encoding/hex"
 	"fmt"
 	"reflect"
 	"testing"
@@ -47,9 +48,13 @@ func TestDecryptor(t *testing.T) {
 			fmt.Sprintf("K: %s, N: %v, A: %v, C: %v, T: %v -> P: %v", td.key, Nonce, td.associatedData, td.ciphertext, td.mac, td.plaintext),
 			func(t *testing.T) {
 				d := mgmgo.NewDecryptor()
-				plaintext, err := d.Decrypt(td.key, Nonce.Bytes(), td.associatedData, td.ciphertext, td.mac)
+				k, err := hex.DecodeString(td.key)
 				if err != nil {
-					t.Fatalf("Error: %s", err)
+					t.Fatalf("Error during key decoding: %s", err)
+				}
+				plaintext, err := d.Decrypt(k, Nonce.Bytes(), td.associatedData, td.ciphertext, td.mac)
+				if err != nil {
+					t.Fatalf("Error during decryption: %s", err)
 				}
 				if !reflect.DeepEqual(td.plaintext, plaintext) {
 					t.Fatalf("Got:  %v, \nWant: %v", plaintext, td.plaintext)

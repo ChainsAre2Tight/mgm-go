@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ChainsAre2Tight/kuznechik-go/pkg/types"
+	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 	"github.com/ChainsAre2Tight/mgm-go/internal/gcm"
 )
 
 func Encypt(
 	plaintext []*bitstrings.BitString128,
-	keys *types.RoundKeys,
+	keys kuznechikgo.RoundKeys,
 	nonce *bitstrings.BitString128,
 	ctx context.Context,
 ) ([]*bitstrings.BitString128, error) {

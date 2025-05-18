@@ -2,7 +2,7 @@ package mgmgo
 
 type Encryptor interface {
 	Encrypt(
-		key string,
+		key []byte,
 		associatedData []byte,
 		plaintext []byte,
 	) (
@@ -15,7 +15,7 @@ type Encryptor interface {
 
 type Decryptor interface {
 	Decrypt(
-		key string,
+		key []byte,
 		nonce []byte,
 		associatedData []byte,
 		ciphertext []byte,

@@ -12,7 +12,10 @@ func main() {
 	decryptor := mgmgo.NewDecryptor()
 
 	// Ключ должен быть длиной 256 бит (64 hex символа)
-	key := "8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF"
+	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	if err != nil {
+		log.Fatalf("Error during key decoding: %s", err)
+	}
 	nonce, err := hex.DecodeString("00000000000000000000000000000001")
 	if err != nil {
 		log.Fatalf("Error during nonce decoding: %s", err)
@@ -27,6 +30,7 @@ func main() {
 		log.Fatalf("Error during mac decoding: %s", err)
 	}
 
+	// if MAC authentication fails, an ErrMACsDiffer will be returned
 	plaintext, err := decryptor.Decrypt(key, nonce, associatedData, ciphertext, mac)
 	if err != nil {
 		log.Fatalf("Decryption failed: %s", err)

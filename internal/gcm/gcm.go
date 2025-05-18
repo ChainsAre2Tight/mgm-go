@@ -4,8 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ChainsAre2Tight/kuznechik-go/pkg/block"
-	kt "github.com/ChainsAre2Tight/kuznechik-go/pkg/types"
+	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 	"github.com/ChainsAre2Tight/mgm-go/internal/interfaces"
 	"golang.org/x/sync/errgroup"
@@ -15,7 +14,7 @@ func Seed(
 	iv bitstrings.BitString128,
 	depth int,
 	increment func(*bitstrings.BitString128),
-	keys *kt.RoundKeys,
+	keys kuznechikgo.RoundKeys,
 	ctx context.Context,
 ) ([]*bitstrings.BitString128, error) {
 	fail := func(err error) ([]*bitstrings.BitString128, error) {
@@ -57,9 +56,9 @@ func Seed(
 
 func EncryptBitString(
 	target interfaces.BitString,
-	keys *kt.RoundKeys,
+	keys kuznechikgo.RoundKeys,
 ) (*bitstrings.BitString128, error) {
-	bytes, err := block.Encrypt(
+	bytes, err := kuznechikgo.Encrypt(
 		target.Bytes(),
 		keys,
 	)

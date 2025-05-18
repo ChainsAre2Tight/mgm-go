@@ -2,11 +2,12 @@ package maccomputation_test
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"reflect"
 	"testing"
 
-	"github.com/ChainsAre2Tight/kuznechik-go/pkg/keyschedule"
+	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 	"github.com/ChainsAre2Tight/mgm-go/internal/maccomputation"
 )
@@ -43,7 +44,11 @@ func TestMAC(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%d", i+1),
 			func(t *testing.T) {
-				keys, err := keyschedule.Schedule(td.key)
+				k, err := hex.DecodeString(td.key)
+				if err != nil {
+					t.Fatalf("Error during key decoding: %s", err)
+				}
+				keys, err := kuznechikgo.Schedule(k)
 				if err != nil {
 					t.Fatalf("error during keyschedule: %s", err)
 				}

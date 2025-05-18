@@ -2,6 +2,10 @@
 
 Проект реализует режим аутентифицированного шифрования MGM (RFC 9058) на языке Go. Для шифрования данных используется алгоритм **Кузнечик** (ГОСТ 34.12-2015), и ключ для шифрования должен иметь длину **256 бит (32 байта)**. Для генерации уникальных значений `nonce` используется потоковый генератор. Блочное шифрование/дешифрование производится параллельно.
 
+Модуль шифрования производит шифрование и генерацицию имитовставки на основании открытого текста и дополнительных имитозащищаемых данных.
+
+Модуль расшифрования производит сравнение представленной имитовставки с вычисленной на этапе расшифрования и выводит ошибку если они различаются.
+
 ## Установка
 
 ```bash
@@ -9,12 +13,16 @@ go get github.com/ChainsAre2Tight/mgm-go
 ```
 
 ## Пример использования
+
+Смотри раздел [примеры](https://github.com/ChainsAre2Tight/mgm-go/tree/master/examples)
+
 ### Шифрование
 
 ```GO
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"log"
 
@@ -27,12 +35,14 @@ func main() {
 	encryptor := mgmgo.NewEncryptor(nonceGenerator)
 
 	// Ключ должен быть длиной 256 бит (64 hex символа)
-	key := "8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF"
+	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	if err != nil {
+		log.Fatalf("Error during key decoding: %s", err)
+	}
 	associatedData := []byte("your-associated-data")
 	plaintext := []byte("your-message")
 
 	nonce, ciphertext, mac, err := encryptor.Encrypt(key, associatedData, plaintext)
-
 	if err != nil {
 		log.Fatalf("Encryption failed: %s", err)
 	}
@@ -41,7 +51,6 @@ func main() {
 	fmt.Printf("Ciphertext: %x\n", ciphertext)
 	fmt.Printf("MAC: %x\n", mac)
 }
-
 ```
 
 ### Расшифрование и проверка подлиности
@@ -61,7 +70,10 @@ func main() {
 	decryptor := mgmgo.NewDecryptor()
 
 	// Ключ должен быть длиной 256 бит (64 hex символа)
-	key := "8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF"
+	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	if err != nil {
+		log.Fatalf("Error during key decoding: %s", err)
+	}
 	nonce, err := hex.DecodeString("00000000000000000000000000000001")
 	if err != nil {
 		log.Fatalf("Error during nonce decoding: %s", err)
@@ -76,13 +88,12 @@ func main() {
 		log.Fatalf("Error during mac decoding: %s", err)
 	}
 
+	// if MAC authentication fails, an ErrMACsDiffer will be returned
 	plaintext, err := decryptor.Decrypt(key, nonce, associatedData, ciphertext, mac)
-
 	if err != nil {
 		log.Fatalf("Decryption failed: %s", err)
 	}
 
 	fmt.Printf("Plaintext: %s\n", string(plaintext))
 }
-
 ```

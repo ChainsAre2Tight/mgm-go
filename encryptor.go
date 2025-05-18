@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ChainsAre2Tight/kuznechik-go/pkg/keyschedule"
+	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 	"github.com/ChainsAre2Tight/mgm-go/internal/encryption"
 	"github.com/ChainsAre2Tight/mgm-go/internal/maccomputation"
@@ -25,7 +25,7 @@ func NewEncryptor(
 }
 
 func (e *encryptor) Encrypt(
-	key string,
+	key []byte,
 	associatedData []byte,
 	plaintext []byte,
 ) (
@@ -40,7 +40,7 @@ func (e *encryptor) Encrypt(
 		return nil, nil, nil, fmt.Errorf("encryptor.Encrypt: %s", err)
 	}
 	// schedule keys
-	keys, err := keyschedule.Schedule(key)
+	keys, err := kuznechikgo.Schedule(key)
 	if err != nil {
 		return fail(fmt.Errorf("key schedule: %s", err))
 	}

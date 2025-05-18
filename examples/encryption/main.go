@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"log"
 
@@ -13,7 +14,10 @@ func main() {
 	encryptor := mgmgo.NewEncryptor(nonceGenerator)
 
 	// Ключ должен быть длиной 256 бит (64 hex символа)
-	key := "8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF"
+	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	if err != nil {
+		log.Fatalf("Error during key decoding: %s", err)
+	}
 	associatedData := []byte("your-associated-data")
 	plaintext := []byte("your-message")
 

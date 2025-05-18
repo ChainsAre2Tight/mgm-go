@@ -1,12 +1,12 @@
 package gcm
 
 import (
+	"encoding/hex"
 	"fmt"
 	"reflect"
 	"testing"
 
-	"github.com/ChainsAre2Tight/kuznechik-go/pkg/block"
-	"github.com/ChainsAre2Tight/kuznechik-go/pkg/keyschedule"
+	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 )
 
@@ -34,8 +34,13 @@ func TestEncryptBitString(t *testing.T) {
 					td.upper,
 					td.lower,
 				)
+				k, err := hex.DecodeString(td.key)
+				if err != nil {
+					t.Fatalf("Error during key decoding: %s", err)
+				}
+				fmt.Printf("%x\n", k)
 				// fmt.Printf("%x, %x", rawbs.Upper(), rawbs.Lower())
-				keys, err := keyschedule.Schedule(td.key)
+				keys, err := kuznechikgo.Schedule(k)
 				if err != nil {
 					t.Fatalf("Error during keyscheduling: %s", err)
 				}
@@ -44,7 +49,7 @@ func TestEncryptBitString(t *testing.T) {
 					t.Fatalf("Error during encryption: %s", err)
 				}
 				if td.resU != bs.Upper() || td.resL != bs.Lower() {
-					t.Fatalf("\nGot:  %d | %d, \nWant: %d | %d", bs.Upper(), bs.Lower(), td.resU, td.resL)
+					t.Fatalf("\nGot:  %x | %x, \nWant: %x | %x", bs.Upper(), bs.Lower(), td.resU, td.resL)
 				}
 			},
 		)
@@ -66,11 +71,15 @@ func TestEncryptBytes(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("%s | %v -> %v", td.key, td.in, td.out),
 			func(t *testing.T) {
-				keys, err := keyschedule.Schedule(td.key)
+				k, err := hex.DecodeString(td.key)
+				if err != nil {
+					t.Fatalf("Error during key decoding: %s", err)
+				}
+				keys, err := kuznechikgo.Schedule(k)
 				if err != nil {
 					t.Fatalf("Error during keyschedule: %s", err)
 				}
-				if res, err := block.Encrypt(td.in, keys); err != nil {
+				if res, err := kuznechikgo.Encrypt(td.in, keys); err != nil {
 					t.Fatalf("error during encryption: %s", err)
 				} else if !reflect.DeepEqual(res, td.out) {
 					t.Fatalf("\nGot:  %v, \nWant: %v.", res, td.out)

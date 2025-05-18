@@ -1,6 +1,7 @@
 package mgmgo_test
 
 import (
+	"encoding/hex"
 	"fmt"
 	"reflect"
 	"testing"
@@ -59,7 +60,11 @@ func TestEncryptor(t *testing.T) {
 			fmt.Sprintf("K: %s, P: %v, A: %v -> N: %v, C: %v, T: %v", td.key, td.plaintext, td.associatedData, Nonce, td.ciphertext, td.mac),
 			func(t *testing.T) {
 				e := mgmgo.NewEncryptor(&NonceGeneratorMock{})
-				nonce, ciphertex, mac, err := e.Encrypt(td.key, td.associatedData, td.plaintext)
+				k, err := hex.DecodeString(td.key)
+				if err != nil {
+					t.Fatalf("Error during key decoding: %s", err)
+				}
+				nonce, ciphertex, mac, err := e.Encrypt(k, td.associatedData, td.plaintext)
 				if err != nil {
 					t.Fatalf("Error: %s", err)
 				}

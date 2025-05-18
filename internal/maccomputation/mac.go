@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ChainsAre2Tight/kuznechik-go/pkg/types"
+	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 	"github.com/ChainsAre2Tight/mgm-go/internal/gcm"
 )
 
 func Compute(
-	keys *types.RoundKeys,
+	keys kuznechikgo.RoundKeys,
 	nonce *bitstrings.BitString128,
 	authenticatedData, ciphertext []*bitstrings.BitString128,
 	lengthAuth, lengthPlain uint64,
