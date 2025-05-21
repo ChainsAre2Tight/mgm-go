@@ -54,7 +54,7 @@ func (e *encryptor) Encrypt(
 	plaintextArray, plaintextLength := bitstrings.SliceFromText(plaintext)
 
 	// encrypt plaintext
-	ciphertextArray, err := encryption.Encypt(plaintextArray, keys, nonceRaw, ctx)
+	ciphertextArray, err := encryption.Encrypt(plaintextArray, keys, nonceRaw, ctx)
 	if err != nil {
 		return fail(fmt.Errorf("plaintext encryption: %s", err))
 	}

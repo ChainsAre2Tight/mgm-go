@@ -73,7 +73,7 @@ func (d *decryptor) Decrypt(
 	}
 
 	// decrypt ciphertext
-	plaintextArray, err := encryption.Decypt(ciphertextArray, keys, nonceRaw, ctx)
+	plaintextArray, err := encryption.Decrypt(ciphertextArray, keys, nonceRaw, ctx)
 	if err != nil {
 		return fail(fmt.Errorf("ciphertext decryption: %s", err))
 	}

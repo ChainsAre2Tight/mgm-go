@@ -82,3 +82,28 @@ func TestSeed(t *testing.T) {
 		)
 	}
 }
+
+func BenchmarkSeed(b *testing.B) {
+	iv := *bitstrings.FromGOSTString("11 22 33 44 55 66 77 00 FF EE DD CC BB AA 99 88")
+	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	if err != nil {
+		b.Fatalf("Error during key decoding: %s", err)
+	}
+	keys, err := kuznechikgo.Schedule(key)
+	if err != nil {
+		b.Fatalf("Error during keyschedule: %s", err)
+	}
+	ctx := context.Background()
+	for b.Loop() {
+		_, err := gcm.Seed(
+			iv,
+			8,
+			bitstrings.IncrementR,
+			keys,
+			ctx,
+		)
+		if err != nil {
+			b.Fatalf("Error during seeding: %s", err)
+		}
+	}
+}

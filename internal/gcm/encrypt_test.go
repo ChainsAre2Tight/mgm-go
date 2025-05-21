@@ -88,3 +88,21 @@ func TestEncryptBytes(t *testing.T) {
 		)
 	}
 }
+
+func BenchmarkEncryptBitstring(b *testing.B) {
+	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	if err != nil {
+		b.Fatalf("Error during key decoding: %s", err)
+	}
+	keys, err := kuznechikgo.Schedule(key)
+	if err != nil {
+		b.Fatalf("Error during keyschedule: %s", err)
+	}
+	rawbs := bitstrings.NewBitString(0x1234567890123456, 0x1234567890123456)
+	for b.Loop() {
+		_, err := EncryptBitString(rawbs, keys)
+		if err != nil {
+			b.Fatalf("Error during encryption: %s", err)
+		}
+	}
+}

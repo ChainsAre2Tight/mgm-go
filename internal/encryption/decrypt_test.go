@@ -48,7 +48,7 @@ func TestDecrypt(t *testing.T) {
 				if err != nil {
 					t.Fatalf("error during keyschedule: %s", err)
 				}
-				if res, err := encryption.Decypt(td.ciphertext, keys, td.nonce, context.Background()); err != nil {
+				if res, err := encryption.Decrypt(td.ciphertext, keys, td.nonce, context.Background()); err != nil {
 					t.Fatalf("error during decryption: %s", err)
 				} else if !reflect.DeepEqual(td.plaintext, res) {
 					t.Fatalf("\nGot:  %s, \nWant: %s", bitstrings.RepresentPointerArray(res), bitstrings.RepresentPointerArray(td.plaintext))

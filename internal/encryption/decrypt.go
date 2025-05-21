@@ -9,7 +9,7 @@ import (
 	"github.com/ChainsAre2Tight/mgm-go/internal/gcm"
 )
 
-func Decypt(
+func Decrypt(
 	ciphertext []*bitstrings.BitString128,
 	keys kuznechikgo.RoundKeys,
 	nonce *bitstrings.BitString128,
