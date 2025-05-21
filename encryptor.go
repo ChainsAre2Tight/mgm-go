@@ -40,10 +40,12 @@ func (e *encryptor) Encrypt(
 		return nil, nil, nil, fmt.Errorf("encryptor.Encrypt: %s", err)
 	}
 	// schedule keys
-	keys, err := kuznechikgo.Schedule(key)
+	k, err := kuznechikgo.Schedule(key)
 	if err != nil {
 		return fail(fmt.Errorf("key schedule: %s", err))
 	}
+	// convert keys for new Uint64 functions added in kuznechik-go v1.1
+	keys := kuznechikgo.KeysToUints(k)
 
 	// get nonce
 	nonceRaw := e.ng.Nonce()

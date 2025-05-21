@@ -15,10 +15,11 @@ func BenchmarkMAC(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Error during key decoding: %s", err)
 	}
-	keys, err := kuznechikgo.Schedule(key)
+	k, err := kuznechikgo.Schedule(key)
 	if err != nil {
 		b.Fatalf("Error during keyschedule: %s", err)
 	}
+	keys := kuznechikgo.KeysToUints(k)
 	nonce := bitstrings.FromGOSTString("11 22 33 44 55 66 77 00 FF EE DD CC BB AA 99 88")
 	authenticatedData := []*bitstrings.BitString128{
 		bitstrings.FromGOSTString("02 02 02 02 02 02 02 02 01 01 01 01 01 01 01 01"),

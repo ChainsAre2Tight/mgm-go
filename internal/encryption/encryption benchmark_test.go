@@ -22,10 +22,11 @@ func BenchmarkEncryption(b *testing.B) {
 		bitstrings.FromGOSTString("11 22 33 44 55 66 77 88 99 AA BB CC EE FF 0A 00"),
 		bitstrings.FromGOSTString("22 33 44 55 66 77 88 99 AA BB CC EE FF 0A 00 11"),
 	}
-	keys, err := kuznechikgo.Schedule(key)
+	k, err := kuznechikgo.Schedule(key)
 	if err != nil {
 		b.Fatalf("Error during keyschedule: %s", err)
 	}
+	keys := kuznechikgo.KeysToUints(k)
 	ctx := context.Background()
 	for b.Loop() {
 		_, err := encryption.Encrypt(plaintext, keys, nonce, ctx)

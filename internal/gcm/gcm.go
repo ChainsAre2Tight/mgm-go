@@ -14,7 +14,7 @@ func Seed(
 	iv bitstrings.BitString128,
 	depth int,
 	increment func(*bitstrings.BitString128),
-	keys kuznechikgo.RoundKeys,
+	keys kuznechikgo.UintRoundKeys,
 	ctx context.Context,
 ) ([]*bitstrings.BitString128, error) {
 	fail := func(err error) ([]*bitstrings.BitString128, error) {
@@ -56,14 +56,15 @@ func Seed(
 
 func EncryptBitString(
 	target interfaces.BitString,
-	keys kuznechikgo.RoundKeys,
+	keys kuznechikgo.UintRoundKeys,
 ) (*bitstrings.BitString128, error) {
-	bytes, err := kuznechikgo.Encrypt(
-		target.Bytes(),
+	upper, lower, err := kuznechikgo.UintEncrypt(
+		target.Upper(),
+		target.Lower(),
 		keys,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("gcm.encryptBitString: %s", err)
 	}
-	return bitstrings.FromBytes(bytes), nil
+	return bitstrings.NewBitString(upper, lower), nil
 }

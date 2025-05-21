@@ -36,10 +36,11 @@ func (d *decryptor) Decrypt(
 		return nil, fmt.Errorf("decryptor.Decrypt: %s", err)
 	}
 	// schedule keys
-	keys, err := kuznechikgo.Schedule(key)
+	k, err := kuznechikgo.Schedule(key)
 	if err != nil {
 		return fail(fmt.Errorf("key schedule: %s", err))
 	}
+	keys := kuznechikgo.KeysToUints(k)
 
 	// get nonce
 	nonceRaw := bitstrings.FromBytes(nonce)

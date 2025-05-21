@@ -10,7 +10,7 @@ import (
 )
 
 func Compute(
-	keys kuznechikgo.RoundKeys,
+	keys kuznechikgo.UintRoundKeys,
 	nonce *bitstrings.BitString128,
 	authenticatedData, ciphertext []*bitstrings.BitString128,
 	lengthAuth, lengthPlain uint64,

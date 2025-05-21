@@ -48,10 +48,11 @@ func TestMAC(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Error during key decoding: %s", err)
 				}
-				keys, err := kuznechikgo.Schedule(k)
+				ks, err := kuznechikgo.Schedule(k)
 				if err != nil {
 					t.Fatalf("error during keyschedule: %s", err)
 				}
+				keys := kuznechikgo.KeysToUints(ks)
 				res, err := maccomputation.Compute(
 					keys,
 					td.nonce,

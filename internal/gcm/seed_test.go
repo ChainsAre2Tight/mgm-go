@@ -60,10 +60,11 @@ func TestSeed(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Error during key decoding: %s", err)
 				}
-				keys, err := kuznechikgo.Schedule(k)
+				ks, err := kuznechikgo.Schedule(k)
 				if err != nil {
 					t.Fatalf("Error during keyschedule: %s", err)
 				}
+				keys := kuznechikgo.KeysToUints(ks)
 				res, err := gcm.Seed(
 					td.iv,
 					td.depth,
@@ -89,10 +90,11 @@ func BenchmarkSeed(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Error during key decoding: %s", err)
 	}
-	keys, err := kuznechikgo.Schedule(key)
+	k, err := kuznechikgo.Schedule(key)
 	if err != nil {
 		b.Fatalf("Error during keyschedule: %s", err)
 	}
+	keys := kuznechikgo.KeysToUints(k)
 	ctx := context.Background()
 	for b.Loop() {
 		_, err := gcm.Seed(

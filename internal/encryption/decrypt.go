@@ -11,7 +11,7 @@ import (
 
 func Decrypt(
 	ciphertext []*bitstrings.BitString128,
-	keys kuznechikgo.RoundKeys,
+	keys kuznechikgo.UintRoundKeys,
 	nonce *bitstrings.BitString128,
 	ctx context.Context,
 ) ([]*bitstrings.BitString128, error) {

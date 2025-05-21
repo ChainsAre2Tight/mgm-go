@@ -40,10 +40,11 @@ func TestEncryptBitString(t *testing.T) {
 				}
 				fmt.Printf("%x\n", k)
 				// fmt.Printf("%x, %x", rawbs.Upper(), rawbs.Lower())
-				keys, err := kuznechikgo.Schedule(k)
+				ks, err := kuznechikgo.Schedule(k)
 				if err != nil {
 					t.Fatalf("Error during keyscheduling: %s", err)
 				}
+				keys := kuznechikgo.KeysToUints(ks)
 				bs, err := EncryptBitString(rawbs, keys)
 				if err != nil {
 					t.Fatalf("Error during encryption: %s", err)
@@ -94,10 +95,11 @@ func BenchmarkEncryptBitstring(b *testing.B) {
 	if err != nil {
 		b.Fatalf("Error during key decoding: %s", err)
 	}
-	keys, err := kuznechikgo.Schedule(key)
+	k, err := kuznechikgo.Schedule(key)
 	if err != nil {
 		b.Fatalf("Error during keyschedule: %s", err)
 	}
+	keys := kuznechikgo.KeysToUints(k)
 	rawbs := bitstrings.NewBitString(0x1234567890123456, 0x1234567890123456)
 	for b.Loop() {
 		_, err := EncryptBitString(rawbs, keys)
