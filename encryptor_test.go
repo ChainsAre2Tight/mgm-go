@@ -70,7 +70,7 @@ func TestEncryptor(t *testing.T) {
 				}
 				if !reflect.DeepEqual(ciphertex, td.ciphertext) || !reflect.DeepEqual(mac, td.mac) {
 					t.Fatalf(
-						"\n\tNonce: \nGot:  %v, \nWant: %v, \n\tCiphertext: \nGot:  %v, \nWant: %v, \n\tMAC: \nGot:  %v, \nWant: %v.",
+						"\n\tNonce: \nGot:  %x, \nWant: %x, \n\tCiphertext: \nGot:  %x, \nWant: %x, \n\tMAC: \nGot:  %x, \nWant: %x.",
 						nonce, nonce, ciphertex, td.ciphertext, mac, td.mac,
 					)
 				}

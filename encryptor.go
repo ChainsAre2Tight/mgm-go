@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
+	ad "github.com/ChainsAre2Tight/mgm-go/internal/associateddata"
 	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 	"github.com/ChainsAre2Tight/mgm-go/internal/encryption"
 	"github.com/ChainsAre2Tight/mgm-go/internal/maccomputation"
@@ -24,7 +25,7 @@ func NewEncryptor(
 	}
 }
 
-func (e *encryptor) Encrypt(
+func (e *encryptor) OldEncrypt(
 	key []byte,
 	associatedData []byte,
 	plaintext []byte,
@@ -90,4 +91,49 @@ func (e *encryptor) Encrypt(
 	}
 
 	return nonce, ciphertext, mac, nil
+}
+
+func (e *encryptor) Encrypt(
+	key []byte,
+	associatedData []byte,
+	plaintext []byte,
+) (
+	nonce []byte,
+	ciphertext []byte,
+	mac []byte,
+	err error,
+) {
+	fail := func(err error) ([]byte, []byte, []byte, error) {
+		return nil, nil, nil, fmt.Errorf("encryptor.Encrypt: %s", err)
+	}
+
+	// schedule keys
+	k, err := kuznechikgo.Schedule(key)
+	if err != nil {
+		return fail(fmt.Errorf("key schedule: %s", err))
+	}
+	// convert keys for new Uint64 functions added in kuznechik-go v1.1
+	keys := kuznechikgo.KeysToUints(k)
+	// get nonce
+	nonceRaw := e.ng.Nonce()
+
+	// compute authenticated data and ciphertext length
+	lengthAuth := uint64(len(associatedData)) * 8
+	lengthPlaintext := uint64(len(plaintext)) * 8
+
+	// create MAC of associated data
+	macUpper, macLower, counterUpper, counterLower, err := ad.ComputeADMAC(keys, nonceRaw.Upper(), nonceRaw.Lower(), associatedData)
+	if err != nil {
+		return fail(fmt.Errorf("ad: %s", err))
+	}
+
+	ciphertext, mac, err = encryption.EncryptAndComputeMAC(
+		keys, nonceRaw.Upper(), nonceRaw.Lower(), counterUpper, counterLower, macUpper, macLower, plaintext, lengthAuth, lengthPlaintext,
+	)
+
+	if err != nil {
+		return fail(fmt.Errorf("encryption: %s", err))
+	}
+
+	return nonceRaw.Bytes(), ciphertext, mac, nil
 }
