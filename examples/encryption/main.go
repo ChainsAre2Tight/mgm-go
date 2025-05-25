@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
 	"log"
 
@@ -9,24 +8,19 @@ import (
 )
 
 func main() {
-	nonceGenerator := mgmgo.NewNonceGenerator()
+	key := make([]byte, 32)
 
-	encryptor := mgmgo.NewEncryptor(nonceGenerator)
-
-	// Ключ должен быть длиной 256 бит (64 hex символа)
-	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	mgm, err := mgmgo.New(key)
 	if err != nil {
-		log.Fatalf("Error during key decoding: %s", err)
+		log.Fatalf("Error during encryptor creation: %s", err)
 	}
-	associatedData := []byte("your-associated-data")
+
+	additionalData := []byte("your-associated-data")
 	plaintext := []byte("your-message")
+	nonce := make([]byte, mgm.NonceSize())
 
-	nonce, ciphertext, mac, err := encryptor.Encrypt(key, associatedData, plaintext)
-	if err != nil {
-		log.Fatalf("Encryption failed: %s", err)
-	}
+	result := mgm.Seal(plaintext[:0], nonce, plaintext, additionalData)
 
-	fmt.Printf("Nonce: %x\n", nonce)
-	fmt.Printf("Ciphertext: %x\n", ciphertext)
-	fmt.Printf("MAC: %x\n", mac)
+	fmt.Printf("Ciphertext: %x\n", result[:len(plaintext)])
+	fmt.Printf("MAC: %x\n", result[len(plaintext):])
 }

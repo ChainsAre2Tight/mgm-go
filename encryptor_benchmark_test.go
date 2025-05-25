@@ -21,15 +21,16 @@ func BenchmarkEncryptor(b *testing.B) {
 		0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03,
 		0xEA, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05,
 	}
-	e := mgmgo.NewEncryptor(&NonceGeneratorMock{})
+
 	k, err := hex.DecodeString(key)
 	if err != nil {
 		b.Fatalf("Error during key decoding: %s", err)
 	}
+	e, err := mgmgo.New(k)
+	if err != nil {
+		b.Fatalf("Error during initialization: %s", err)
+	}
 	for b.Loop() {
-		_, _, _, err := e.Encrypt(k, associatedData, plaintext)
-		if err != nil {
-			b.Fatalf("Error: %s", err)
-		}
+		_ = e.Seal(nil, Nonce, plaintext, associatedData)
 	}
 }

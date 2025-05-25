@@ -1,139 +1,85 @@
 package mgmgo
 
 import (
-	"context"
+	"crypto/cipher"
+	"encoding/binary"
 	"fmt"
 
 	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	ad "github.com/ChainsAre2Tight/mgm-go/internal/associateddata"
-	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 	"github.com/ChainsAre2Tight/mgm-go/internal/encryption"
-	"github.com/ChainsAre2Tight/mgm-go/internal/maccomputation"
 )
 
-var _ Encryptor = (*encryptor)(nil)
+var _ cipher.AEAD = (*MGM)(nil)
 
-type encryptor struct {
-	ng NonceGenerator
+type EncryptorFunc func(uint64, uint64) (uint64, uint64)
+
+type MGM struct {
+	encryptorFunc EncryptorFunc
+	keys          kuznechikgo.UintRoundKeys
 }
 
-func NewEncryptor(
-	ng NonceGenerator,
-) *encryptor {
-	return &encryptor{
-		ng: ng,
-	}
-}
-
-func (e *encryptor) OldEncrypt(
-	key []byte,
-	associatedData []byte,
-	plaintext []byte,
-) (
-	nonce []byte,
-	ciphertext []byte,
-	mac []byte,
-	err error,
-) {
-	ctx, cancel := context.WithCancel(context.Background())
-	fail := func(err error) ([]byte, []byte, []byte, error) {
-		cancel()
-		return nil, nil, nil, fmt.Errorf("encryptor.Encrypt: %s", err)
-	}
-	// schedule keys
+func New(key []byte) (cipher.AEAD, error) {
 	k, err := kuznechikgo.Schedule(key)
 	if err != nil {
-		return fail(fmt.Errorf("key schedule: %s", err))
+		return nil, fmt.Errorf("mgm.New: Error during keyschedule: %s", err)
 	}
-	// convert keys for new Uint64 functions added in kuznechik-go v1.1
-	keys := kuznechikgo.KeysToUints(k)
-
-	// get nonce
-	nonceRaw := e.ng.Nonce()
-	nonce = nonceRaw.Bytes()
-
-	// compute authenticated data and ciphertext length
-	authenticatedDataArray, authenticatedDataLength := bitstrings.SliceFromText(associatedData)
-	plaintextArray, plaintextLength := bitstrings.SliceFromText(plaintext)
-
-	// encrypt plaintext
-	ciphertextArray, err := encryption.Encrypt(plaintextArray, keys, nonceRaw, ctx)
-	if err != nil {
-		return fail(fmt.Errorf("plaintext encryption: %s", err))
+	res := MGM{
+		keys: kuznechikgo.KeysToUints(k),
 	}
-
-	// make MSB(u) out of the last ciphertext block
-	if u := int(plaintextLength % 128); u != 0 {
-		ciphertextArray[len(ciphertextArray)-1], err = bitstrings.MSB(ciphertextArray[len(ciphertextArray)-1], u)
-		if err != nil {
-			return fail(fmt.Errorf("MSB: %s", err))
-		}
+	res.encryptorFunc = func(u, l uint64) (uint64, uint64) {
+		return kuznechikgo.UintEncrypt(u, l, res.keys)
 	}
-
-	// compute MAC
-	macRaw, err := maccomputation.Compute(
-		keys,
-		nonceRaw,
-		authenticatedDataArray,
-		ciphertextArray,
-		authenticatedDataLength,
-		plaintextLength,
-		ctx,
-	)
-	if err != nil {
-		return fail(fmt.Errorf("mac computation: %s", err))
-	}
-	mac = macRaw.Bytes()
-
-	ciphertext, err = bitstrings.TextFromSlice(ciphertextArray, plaintextLength)
-	if err != nil {
-		return fail(fmt.Errorf("ciphertex to bytes: %s", err))
-	}
-
-	return nonce, ciphertext, mac, nil
+	return &res, nil
 }
 
-func (e *encryptor) Encrypt(
-	key []byte,
-	associatedData []byte,
-	plaintext []byte,
-) (
-	nonce []byte,
-	ciphertext []byte,
-	mac []byte,
-	err error,
-) {
-	fail := func(err error) ([]byte, []byte, []byte, error) {
-		return nil, nil, nil, fmt.Errorf("encryptor.Encrypt: %s", err)
-	}
+func (m *MGM) NonceSize() int {
+	return 16
+}
 
-	// schedule keys
-	k, err := kuznechikgo.Schedule(key)
-	if err != nil {
-		return fail(fmt.Errorf("key schedule: %s", err))
-	}
-	// convert keys for new Uint64 functions added in kuznechik-go v1.1
-	keys := kuznechikgo.KeysToUints(k)
-	// get nonce
-	nonceRaw := e.ng.Nonce()
+func (m *MGM) Overhead() int {
+	return 1 << 62
+}
 
-	// compute authenticated data and ciphertext length
-	lengthAuth := uint64(len(associatedData)) * 8
+func (m *MGM) Open(dst []byte, nonce []byte, ciphertext []byte, additionalData []byte) ([]byte, error) {
+	panic("unimplemented")
+}
+
+// Taken from go/src/crypto/cipher/gcm.go
+func sliceForAppend(in []byte, n int) (head, tail []byte) {
+	if total := len(in) + n; cap(in) >= total {
+		head = in[:total]
+	} else {
+		head = make([]byte, total)
+		copy(head, in)
+	}
+	tail = head[len(in):]
+	return
+}
+
+func (m *MGM) Seal(dst []byte, nonce []byte, plaintext []byte, additionalData []byte) []byte {
+
+	// todo delete
+	lengthAuth := uint64(len(additionalData)) * 8
 	lengthPlaintext := uint64(len(plaintext)) * 8
 
-	// create MAC of associated data
-	macUpper, macLower, counterUpper, counterLower, err := ad.ComputeADMAC(keys, nonceRaw.Upper(), nonceRaw.Lower(), associatedData)
-	if err != nil {
-		return fail(fmt.Errorf("ad: %s", err))
-	}
+	nonceUpper := binary.BigEndian.Uint64(nonce[:8])
+	nonceLower := binary.BigEndian.Uint64(nonce[8:])
 
-	ciphertext, mac, err = encryption.EncryptAndComputeMAC(
-		keys, nonceRaw.Upper(), nonceRaw.Lower(), counterUpper, counterLower, macUpper, macLower, plaintext, lengthAuth, lengthPlaintext,
+	macUpper, macLower, counterUpper, counterLower := ad.ComputeADMAC(m.encryptorFunc, nonceUpper, nonceLower, additionalData)
+
+	head, tail := sliceForAppend(dst, len(plaintext)+16)
+
+	encryption.EncryptAndComputeMAC(
+		m.encryptorFunc,
+		nonceUpper, nonceLower,
+		counterUpper, counterLower,
+		macUpper, macLower,
+		plaintext,
+		lengthAuth, lengthPlaintext,
+		tail[:len(plaintext)],
+		tail[len(plaintext):],
 	)
 
-	if err != nil {
-		return fail(fmt.Errorf("encryption: %s", err))
-	}
-
-	return nonceRaw.Bytes(), ciphertext, mac, nil
+	return head
 }

@@ -1,25 +1,17 @@
 package mgmgo_test
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
-	"reflect"
 	"testing"
 
 	mgmgo "github.com/ChainsAre2Tight/mgm-go"
-	"github.com/ChainsAre2Tight/mgm-go/internal/bitstrings"
 )
 
 type NonceGeneratorMock struct{}
 
-var Nonce = bitstrings.FromGOSTString("11 22 33 44 55 66 77 00 FF EE DD CC BB AA 99 88")
-
-// Nonce implements nonce.NonceGenerator.
-func (n *NonceGeneratorMock) Nonce() *bitstrings.BitString128 {
-	return Nonce
-}
-
-var _ mgmgo.NonceGenerator = (*NonceGeneratorMock)(nil)
+var Nonce, _ = hex.DecodeString("1122334455667700FFEEDDCCBBAA9988")
 
 func TestEncryptor(t *testing.T) {
 	tt := []struct {
@@ -59,19 +51,22 @@ func TestEncryptor(t *testing.T) {
 		t.Run(
 			fmt.Sprintf("K: %s, P: %v, A: %v -> N: %v, C: %v, T: %v", td.key, td.plaintext, td.associatedData, Nonce, td.ciphertext, td.mac),
 			func(t *testing.T) {
-				e := mgmgo.NewEncryptor(&NonceGeneratorMock{})
 				k, err := hex.DecodeString(td.key)
 				if err != nil {
 					t.Fatalf("Error during key decoding: %s", err)
 				}
-				nonce, ciphertex, mac, err := e.Encrypt(k, td.associatedData, td.plaintext)
+				e, err := mgmgo.New(k)
 				if err != nil {
-					t.Fatalf("Error: %s", err)
+					t.Fatalf("Error during initialization: %s", err)
 				}
-				if !reflect.DeepEqual(ciphertex, td.ciphertext) || !reflect.DeepEqual(mac, td.mac) {
+				res := e.Seal(nil, Nonce, td.plaintext, td.associatedData)
+
+				expected := append(td.ciphertext, td.mac...)
+
+				if !bytes.Equal(res, expected) {
 					t.Fatalf(
-						"\n\tNonce: \nGot:  %x, \nWant: %x, \n\tCiphertext: \nGot:  %x, \nWant: %x, \n\tMAC: \nGot:  %x, \nWant: %x.",
-						nonce, nonce, ciphertex, td.ciphertext, mac, td.mac,
+						"\nGot:  %x, \nWant: %x.",
+						res, expected,
 					)
 				}
 			},

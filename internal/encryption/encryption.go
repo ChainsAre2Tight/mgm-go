@@ -2,35 +2,22 @@ package encryption
 
 import (
 	"encoding/binary"
-	"fmt"
 
-	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	"github.com/ChainsAre2Tight/mgm-go/internal/multiplication"
 	"github.com/ChainsAre2Tight/mgm-go/internal/utils"
 )
 
 func EncryptAndComputeMAC(
-	keys kuznechikgo.UintRoundKeys,
+	encryptorFunc func(uint64, uint64) (uint64, uint64),
 	nonceUpper, nonceLower uint64,
 	counterUpper, counterLower uint64,
 	macUpper, macLower uint64,
 	plaintext []byte,
 	lengthAuth, lengthPlaintext uint64,
-) (
 	ciphertext []byte,
 	mac []byte,
-	err error,
 ) {
-	fail := func(err error) ([]byte, []byte, error) {
-		return nil, nil, fmt.Errorf("ecnryption.EncryptAndComputeMAC: %s", err)
-	}
-
-	nonceUpper, nonceLower, err = kuznechikgo.UintEncrypt((nonceUpper<<1)>>1, nonceLower, keys)
-	if err != nil {
-		return fail(fmt.Errorf("initial nonce encryption: %s", err))
-	}
-
-	ciphertext = make([]byte, 0, (len(plaintext)%8)*8)
+	nonceUpper, nonceLower = encryptorFunc((nonceUpper<<1)>>1, nonceLower)
 
 	var upper, lower uint64
 	for len(plaintext) >= 16 {
@@ -38,22 +25,17 @@ func EncryptAndComputeMAC(
 		lower = binary.BigEndian.Uint64(plaintext[8:16])
 		plaintext = plaintext[16:]
 
-		y_upper, y_lower, err := kuznechikgo.UintEncrypt(nonceUpper, nonceLower, keys)
-		if err != nil {
-			return fail(fmt.Errorf("h counter encryption: %s", err))
-		}
+		y_upper, y_lower := encryptorFunc(nonceUpper, nonceLower)
 		nonceLower++
 
 		upper ^= y_upper
 		lower ^= y_lower
 
-		ciphertext = binary.BigEndian.AppendUint64(ciphertext, upper)
-		ciphertext = binary.BigEndian.AppendUint64(ciphertext, lower)
+		binary.BigEndian.PutUint64(ciphertext[:8], upper)
+		binary.BigEndian.PutUint64(ciphertext[8:16], lower)
+		ciphertext = ciphertext[16:]
 
-		h_upper, h_lower, err := kuznechikgo.UintEncrypt(counterUpper, counterLower, keys)
-		if err != nil {
-			return fail(fmt.Errorf("h counter encryption: %s", err))
-		}
+		h_upper, h_lower := encryptorFunc(counterUpper, counterLower)
 		counterUpper++
 
 		u, l := multiplication.MultiplyUint128(upper, lower, h_upper, h_lower)
@@ -64,17 +46,15 @@ func EncryptAndComputeMAC(
 	upper, lower = utils.UintsToBytesWithPadding(plaintext)
 
 	if len(plaintext) > 0 {
-		y_upper, y_lower, err := kuznechikgo.UintEncrypt(nonceUpper, nonceLower, keys)
-		if err != nil {
-			return fail(fmt.Errorf("y counter encryption final: %s", err))
-		}
+		y_upper, y_lower := encryptorFunc(nonceUpper, nonceLower)
 
 		upper ^= y_upper
 		lower ^= y_lower
 
-		ciphertext = binary.BigEndian.AppendUint64(ciphertext, upper)
-		ciphertext = binary.BigEndian.AppendUint64(ciphertext, lower)
-		ciphertext = ciphertext[:len(ciphertext)-16+len(plaintext)]
+		// careful, those bytes may overlap with auth Tag
+		binary.BigEndian.PutUint64(ciphertext[:8], upper)
+		binary.BigEndian.PutUint64(ciphertext[8:16], lower)
+		ciphertext = ciphertext[:len(plaintext)]
 
 		if len(plaintext) > 8 {
 			shift := uint64((16 - len(plaintext)) * 8)
@@ -85,10 +65,7 @@ func EncryptAndComputeMAC(
 			upper = (upper >> shift) << shift
 		}
 
-		h_upper, h_lower, err := kuznechikgo.UintEncrypt(counterUpper, counterLower, keys)
-		if err != nil {
-			return fail(fmt.Errorf("h counter encryption final: %s", err))
-		}
+		h_upper, h_lower := encryptorFunc(counterUpper, counterLower)
 		counterUpper++
 
 		u, l := multiplication.MultiplyUint128(upper, lower, h_upper, h_lower)
@@ -96,23 +73,15 @@ func EncryptAndComputeMAC(
 		macLower ^= l
 	}
 
-	h_upper, h_lower, err := kuznechikgo.UintEncrypt(counterUpper, counterLower, keys)
-	if err != nil {
-		return fail(fmt.Errorf("h counter encryption final (length): %s", err))
-	}
+	h_upper, h_lower := encryptorFunc(counterUpper, counterLower)
+
 	// finalize
 	u, l := multiplication.MultiplyUint128(lengthAuth, lengthPlaintext, h_upper, h_lower)
 	macUpper ^= u
 	macLower ^= l
 
-	macUpper, macLower, err = kuznechikgo.UintEncrypt(macUpper, macLower, keys)
-	if err != nil {
-		return fail(fmt.Errorf("h counter encryption final (transform): %s", err))
-	}
+	macUpper, macLower = encryptorFunc(macUpper, macLower)
 
-	mac = make([]byte, 0, 16)
-	mac = binary.BigEndian.AppendUint64(mac, macUpper)
-	mac = binary.BigEndian.AppendUint64(mac, macLower)
-
-	return ciphertext, mac, nil
+	binary.BigEndian.PutUint64(mac[0:8], macUpper)
+	binary.BigEndian.PutUint64(mac[8:16], macLower)
 }

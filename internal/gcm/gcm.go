@@ -21,10 +21,7 @@ func Seed(
 		return nil, fmt.Errorf("gcm.Seed: %s", err)
 	}
 
-	encryptedIV, err := EncryptBitString(&iv, keys)
-	if err != nil {
-		return fail(fmt.Errorf("error during initial iv encryption: %s", err))
-	}
+	encryptedIV := EncryptBitString(&iv, keys)
 
 	result := make([]*bitstrings.BitString128, depth)
 	for i := range result {
@@ -37,11 +34,7 @@ func Seed(
 
 	for i := range result {
 		errs.Go(func() error {
-			if new, err := EncryptBitString(result[i], keys); err != nil {
-				return fmt.Errorf("error in gouroutine at %d: %s", i, err)
-			} else {
-				result[i] = new
-			}
+			result[i] = EncryptBitString(result[i], keys)
 			return nil
 		})
 
@@ -57,14 +50,11 @@ func Seed(
 func EncryptBitString(
 	target interfaces.BitString,
 	keys kuznechikgo.UintRoundKeys,
-) (*bitstrings.BitString128, error) {
-	upper, lower, err := kuznechikgo.UintEncrypt(
+) *bitstrings.BitString128 {
+	upper, lower := kuznechikgo.UintEncrypt(
 		target.Upper(),
 		target.Lower(),
 		keys,
 	)
-	if err != nil {
-		return nil, fmt.Errorf("gcm.encryptBitString: %s", err)
-	}
-	return bitstrings.NewBitString(upper, lower), nil
+	return bitstrings.NewBitString(upper, lower)
 }

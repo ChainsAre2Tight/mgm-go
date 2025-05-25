@@ -52,7 +52,7 @@ func TestDecryptor(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Error during key decoding: %s", err)
 				}
-				plaintext, err := d.Decrypt(k, Nonce.Bytes(), td.associatedData, td.ciphertext, td.mac)
+				plaintext, err := d.Decrypt(k, Nonce, td.associatedData, td.ciphertext, td.mac)
 				if err != nil {
 					t.Fatalf("Error during decryption: %s", err)
 				}

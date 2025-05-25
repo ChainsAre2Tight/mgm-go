@@ -65,10 +65,7 @@ func Compute(
 			),
 		))
 
-	mac, err = gcm.EncryptBitString(mac, keys)
-	if err != nil {
-		return fail(fmt.Errorf("mac encryption: %s", err))
-	}
+	mac = gcm.EncryptBitString(mac, keys)
 
 	return mac, nil
 }
