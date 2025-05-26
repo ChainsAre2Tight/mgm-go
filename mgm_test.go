@@ -2,8 +2,10 @@ package mgmgo_test
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"testing"
 
 	mgmgo "github.com/ChainsAre2Tight/mgm-go"
@@ -103,5 +105,30 @@ func TestOpen(t *testing.T) {
 				}
 			},
 		)
+	}
+}
+
+func BenchmarkMGM128(b *testing.B) {
+	key := make([]byte, 32)
+	if _, err := io.ReadFull(rand.Reader, key); err != nil {
+		panic(err)
+	}
+	nonce := make([]byte, 16)
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		panic(err)
+	}
+	nonce[0] &= 0x7F
+	pt := make([]byte, 1280+3)
+	if _, err := io.ReadFull(rand.Reader, pt); err != nil {
+		panic(err)
+	}
+	aead, err := mgmgo.New(key)
+	if err != nil {
+		panic(err)
+	}
+	ct := make([]byte, len(pt)+aead.Overhead())
+
+	for b.Loop() {
+		aead.Seal(ct[:0], nonce, pt, nil)
 	}
 }
