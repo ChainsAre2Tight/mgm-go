@@ -4,11 +4,12 @@ import (
 	"encoding/binary"
 
 	"github.com/ChainsAre2Tight/mgm-go/internal/multiplication"
+	"github.com/ChainsAre2Tight/mgm-go/internal/types"
 	"github.com/ChainsAre2Tight/mgm-go/internal/utils"
 )
 
 func DecryptAndComputeMAC(
-	encryptorFunc func(uint64, uint64) (uint64, uint64),
+	encryptorFunc types.EncryptorFunc,
 	nonceUpper, nonceLower uint64,
 	counterUpper, counterLower uint64,
 	macUpper, macLower uint64,

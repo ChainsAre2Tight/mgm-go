@@ -9,14 +9,13 @@ import (
 	kuznechikgo "github.com/ChainsAre2Tight/kuznechik-go"
 	ad "github.com/ChainsAre2Tight/mgm-go/internal/associateddata"
 	"github.com/ChainsAre2Tight/mgm-go/internal/encryption"
+	"github.com/ChainsAre2Tight/mgm-go/internal/types"
 )
 
 var _ cipher.AEAD = (*MGM)(nil)
 
-type EncryptorFunc func(uint64, uint64) (uint64, uint64)
-
 type MGM struct {
-	encryptorFunc EncryptorFunc
+	encryptorFunc types.EncryptorFunc
 	keys          kuznechikgo.UintRoundKeys
 }
 
