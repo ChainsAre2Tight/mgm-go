@@ -16,7 +16,7 @@ var Nonce, _ = hex.DecodeString("1122334455667700FFEEDDCCBBAA9988")
 var tt = []struct {
 	key            string
 	plaintext      []byte
-	associatedData []byte
+	additionalData []byte
 	ciphertext     []byte
 	mac            []byte
 }{
@@ -29,7 +29,7 @@ var tt = []struct {
 			0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xEE, 0xFF, 0x0A, 0x00, 0x11,
 			0xAA, 0xBB, 0xCC,
 		},
-		associatedData: []byte{
+		additionalData: []byte{
 			0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
 			0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x04, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03, 0x03,
 			0xEA, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05,
@@ -50,7 +50,7 @@ var tt = []struct {
 func TestSeal(t *testing.T) {
 	for _, td := range tt {
 		t.Run(
-			fmt.Sprintf("K: %s, P: %v, A: %v -> N: %v, C: %v, T: %v", td.key, td.plaintext, td.associatedData, Nonce, td.ciphertext, td.mac),
+			fmt.Sprintf("K: %s, P: %v, A: %v -> N: %v, C: %v, T: %v", td.key, td.plaintext, td.additionalData, Nonce, td.ciphertext, td.mac),
 			func(t *testing.T) {
 				k, err := hex.DecodeString(td.key)
 				if err != nil {
@@ -60,7 +60,7 @@ func TestSeal(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Error during initialization: %s", err)
 				}
-				res := e.Seal(nil, Nonce, td.plaintext, td.associatedData)
+				res := e.Seal(nil, Nonce, td.plaintext, td.additionalData)
 
 				expected := make([]byte, len(td.ciphertext), len(td.ciphertext)+len(td.mac))
 				copy(expected, td.ciphertext)
@@ -80,7 +80,7 @@ func TestSeal(t *testing.T) {
 func TestOpen(t *testing.T) {
 	for _, td := range tt {
 		t.Run(
-			fmt.Sprintf("K: %s, P: %v, A: %v -> N: %v, C: %v, T: %v", td.key, td.plaintext, td.associatedData, Nonce, td.ciphertext, td.mac),
+			fmt.Sprintf("K: %s, P: %v, A: %v -> N: %v, C: %v, T: %v", td.key, td.plaintext, td.additionalData, Nonce, td.ciphertext, td.mac),
 			func(t *testing.T) {
 				k, err := hex.DecodeString(td.key)
 				if err != nil {
@@ -90,7 +90,7 @@ func TestOpen(t *testing.T) {
 				if err != nil {
 					t.Fatalf("Error during initialization: %s", err)
 				}
-				res, err := e.Open(nil, Nonce, append(td.ciphertext, td.mac...), td.associatedData)
+				res, err := e.Open(nil, Nonce, append(td.ciphertext, td.mac...), td.additionalData)
 
 				expected := make([]byte, len(td.plaintext))
 				copy(expected, td.plaintext)
