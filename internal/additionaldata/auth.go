@@ -1,4 +1,4 @@
-package associateddata
+package additionaldata
 
 import (
 	"encoding/binary"

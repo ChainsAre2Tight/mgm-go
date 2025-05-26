@@ -12,15 +12,15 @@ func main() {
 
 	// Ключ должен быть длиной 256 бит (64 hex символа)
 	key := make([]byte, 32)
-	nonce := make([]byte, 16)
-	additionalData := []byte("your-associated-data")
-	ciphertext, _ := hex.DecodeString("705007f92ecfb7cffaf6f009")
-	mac, _ := hex.DecodeString("df70a7a01caf7e134f9d6613df9c06c2")
-
 	mgm, err := mgmgo.New(key)
 	if err != nil {
 		log.Fatalf("Error during encryptor creation: %s", err)
 	}
+	nonce := make([]byte, mgm.NonceSize())
+
+	additionalData := []byte("your-additional-data")
+	ciphertext, _ := hex.DecodeString("705007f92ecfb7cffaf6f009")
+	mac, _ := hex.DecodeString("aaa6ba3c301c5194fddfee4f7a413a10")
 
 	result, err := mgm.Open(ciphertext[:0], nonce, append(ciphertext, mac...), additionalData)
 

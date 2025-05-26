@@ -1,16 +1,28 @@
 package main
 
 import (
+	"bufio"
+	"encoding/hex"
 	"fmt"
 	"log"
+	"os"
 
 	mgmgo "github.com/ChainsAre2Tight/mgm-go"
 )
 
 func main() {
+	reader := bufio.NewReader(os.Stdin)
 
-	// Ключ должен быть длиной 256 бит (64 hex символа)
-	key := make([]byte, 32)
+	fmt.Print("Enter key (64 hex symbols): ")
+	text, err := reader.ReadString('\n')
+	if err != nil {
+		log.Fatalf("Error: %s", err)
+	}
+	text = text[:len(text)-1]
+	key, err := hex.DecodeString(text)
+	if err != nil {
+		log.Fatalf("Error during key decoding: %s", err)
+	}
 
 	mgm, err := mgmgo.New(key)
 	if err != nil {
