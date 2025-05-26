@@ -1,10 +1,8 @@
 # MGM: Аутентифицированное шифрование (RFC 9058) с использованием алгоритма Кузнечик
 
-Проект реализует режим аутентифицированного шифрования MGM (RFC 9058) на языке Go. Для шифрования данных используется алгоритм **Кузнечик** (ГОСТ 34.12-2015), и ключ для шифрования должен иметь длину **256 бит (32 байта)**. Для генерации уникальных значений `nonce` используется потоковый генератор. Блочное шифрование/дешифрование производится параллельно.
+Проект реализует режим аутентифицированного шифрования MGM (RFC 9058) на языке Go. Для шифрования данных используется алгоритм **Кузнечик** (ГОСТ 34.12-2015), и ключ для шифрования должен иметь длину **256 бит (32 байта)**.
 
-Модуль шифрования производит шифрование и генерацицию имитовставки на основании открытого текста и дополнительных имитозащищаемых данных.
-
-Модуль расшифрования производит сравнение представленной имитовставки с вычисленной на этапе расшифрования и выводит ошибку если они различаются.
+Модуль реализует инрерфейс cipher.AEAD
 
 ## Установка
 
@@ -22,7 +20,6 @@ go get github.com/ChainsAre2Tight/mgm-go
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
 	"log"
 
@@ -30,26 +27,21 @@ import (
 )
 
 func main() {
-	nonceGenerator := mgmgo.NewNonceGenerator()
+	key := make([]byte, 32)
 
-	encryptor := mgmgo.NewEncryptor(nonceGenerator)
-
-	// Ключ должен быть длиной 256 бит (64 hex символа)
-	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	mgm, err := mgmgo.New(key)
 	if err != nil {
-		log.Fatalf("Error during key decoding: %s", err)
+		log.Fatalf("Error during encryptor creation: %s", err)
 	}
-	associatedData := []byte("your-associated-data")
+
+	additionalData := []byte("your-associated-data")
 	plaintext := []byte("your-message")
+	nonce := make([]byte, mgm.NonceSize())
 
-	nonce, ciphertext, mac, err := encryptor.Encrypt(key, associatedData, plaintext)
-	if err != nil {
-		log.Fatalf("Encryption failed: %s", err)
-	}
+	result := mgm.Seal(plaintext[:0], nonce, plaintext, additionalData)
 
-	fmt.Printf("Nonce: %x\n", nonce)
-	fmt.Printf("Ciphertext: %x\n", ciphertext)
-	fmt.Printf("MAC: %x\n", mac)
+	fmt.Printf("Ciphertext: %x\n", result[:len(plaintext)])
+	fmt.Printf("MAC: %x\n", result[len(plaintext):])
 }
 ```
 
@@ -67,33 +59,25 @@ import (
 )
 
 func main() {
-	decryptor := mgmgo.NewDecryptor()
 
 	// Ключ должен быть длиной 256 бит (64 hex символа)
-	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	key := make([]byte, 32)
+	nonce := make([]byte, 16)
+	additionalData := []byte("your-associated-data")
+	ciphertext, _ := hex.DecodeString("705007f92ecfb7cffaf6f009")
+	mac, _ := hex.DecodeString("df70a7a01caf7e134f9d6613df9c06c2")
+
+	mgm, err := mgmgo.New(key)
 	if err != nil {
-		log.Fatalf("Error during key decoding: %s", err)
-	}
-	nonce, err := hex.DecodeString("00000000000000000000000000000001")
-	if err != nil {
-		log.Fatalf("Error during nonce decoding: %s", err)
-	}
-	associatedData := []byte("your-associated-data")
-	ciphertext, err := hex.DecodeString("5c44d197d9aa123feb46d896")
-	if err != nil {
-		log.Fatalf("Error during ciphertext decoding: %s", err)
-	}
-	mac, err := hex.DecodeString("5f11114a5ee24fdd5085d6ca11a249fe")
-	if err != nil {
-		log.Fatalf("Error during mac decoding: %s", err)
+		log.Fatalf("Error during encryptor creation: %s", err)
 	}
 
-	// if MAC authentication fails, an ErrMACsDiffer will be returned
-	plaintext, err := decryptor.Decrypt(key, nonce, associatedData, ciphertext, mac)
+	result, err := mgm.Open(ciphertext[:0], nonce, append(ciphertext, mac...), additionalData)
+
 	if err != nil {
-		log.Fatalf("Decryption failed: %s", err)
+		log.Fatalf("Error: MACs are different")
 	}
 
-	fmt.Printf("Plaintext: %s\n", string(plaintext))
+	fmt.Printf("Plaintext: %s\n", string(result))
 }
 ```
