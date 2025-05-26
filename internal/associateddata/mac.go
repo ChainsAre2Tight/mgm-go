@@ -41,7 +41,7 @@ func ComputeADMAC(
 		return macUpper, macLower, counterUpper, counterLower
 	}
 
-	upper, lower = utils.UintsToBytesWithPadding(associatedData)
+	upper, lower = utils.BytesToUint64WithPadding(associatedData)
 
 	h_upper, h_lower := encryptorFunc(counterUpper, counterLower)
 	counterUpper++

@@ -1,6 +1,7 @@
 package mgmgo
 
 import (
+	"bytes"
 	"crypto/cipher"
 	"encoding/binary"
 	"fmt"
@@ -42,7 +43,36 @@ func (m *MGM) Overhead() int {
 }
 
 func (m *MGM) Open(dst []byte, nonce []byte, ciphertext []byte, additionalData []byte) ([]byte, error) {
-	panic("unimplemented")
+
+	// todo delete
+	lengthAuth := uint64(len(additionalData)) * 8
+	lengthPlaintext := uint64(len(ciphertext)-16) * 8
+
+	nonceUpper := binary.BigEndian.Uint64(nonce[:8])
+	nonceLower := binary.BigEndian.Uint64(nonce[8:])
+
+	macUpper, macLower, counterUpper, counterLower := ad.ComputeADMAC(m.encryptorFunc, nonceUpper, nonceLower, additionalData)
+
+	head, tail := sliceForAppend(dst, len(ciphertext)-16)
+
+	mac := make([]byte, 16)
+
+	encryption.DecryptAndComputeMAC(
+		m.encryptorFunc,
+		nonceUpper, nonceLower,
+		counterUpper, counterLower,
+		macUpper, macLower,
+		ciphertext[:len(ciphertext)-16],
+		lengthAuth, lengthPlaintext,
+		tail[:len(ciphertext)-16],
+		mac,
+	)
+
+	if !bytes.Equal(mac, ciphertext[len(ciphertext)-16:]) {
+		return head, fmt.Errorf("MACs differ")
+	}
+
+	return head, nil
 }
 
 // Taken from go/src/crypto/cipher/gcm.go

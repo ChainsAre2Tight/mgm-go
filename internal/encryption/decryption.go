@@ -7,7 +7,7 @@ import (
 	"github.com/ChainsAre2Tight/mgm-go/internal/utils"
 )
 
-func EncryptAndComputeMAC(
+func DecryptAndComputeMAC(
 	encryptorFunc func(uint64, uint64) (uint64, uint64),
 	nonceUpper, nonceLower uint64,
 	counterUpper, counterLower uint64,
@@ -25,6 +25,13 @@ func EncryptAndComputeMAC(
 		lower = binary.BigEndian.Uint64(plaintext[8:16])
 		plaintext = plaintext[16:]
 
+		h_upper, h_lower := encryptorFunc(counterUpper, counterLower)
+		counterUpper++
+
+		u, l := multiplication.MultiplyUint128(upper, lower, h_upper, h_lower)
+		macUpper ^= u
+		macLower ^= l
+
 		y_upper, y_lower := encryptorFunc(nonceUpper, nonceLower)
 		nonceLower++
 
@@ -34,13 +41,6 @@ func EncryptAndComputeMAC(
 		binary.BigEndian.PutUint64(ciphertext[:8], upper)
 		binary.BigEndian.PutUint64(ciphertext[8:16], lower)
 		ciphertext = ciphertext[16:]
-
-		h_upper, h_lower := encryptorFunc(counterUpper, counterLower)
-		counterUpper++
-
-		u, l := multiplication.MultiplyUint128(upper, lower, h_upper, h_lower)
-		macUpper ^= u
-		macLower ^= l
 	}
 
 	upper, lower = utils.BytesToUint64WithPadding(plaintext)
@@ -48,27 +48,18 @@ func EncryptAndComputeMAC(
 	if len(plaintext) > 0 {
 		y_upper, y_lower := encryptorFunc(nonceUpper, nonceLower)
 
-		upper ^= y_upper
-		lower ^= y_lower
-
-		// careful, those bytes may overlap with auth Tag
-		utils.Uint64ToBytesWithPadding(upper, lower, ciphertext)
-
-		if len(plaintext) > 8 {
-			shift := uint64((16 - len(plaintext)) * 8)
-			lower = (lower >> shift) << shift
-		} else {
-			lower = 0
-			shift := uint64((8 - len(plaintext)) * 8)
-			upper = (upper >> shift) << shift
-		}
-
 		h_upper, h_lower := encryptorFunc(counterUpper, counterLower)
 		counterUpper++
 
 		u, l := multiplication.MultiplyUint128(upper, lower, h_upper, h_lower)
 		macUpper ^= u
 		macLower ^= l
+
+		upper ^= y_upper
+		lower ^= y_lower
+
+		// careful, those bytes may overlap with auth Tag
+		utils.Uint64ToBytesWithPadding(upper, lower, ciphertext)
 	}
 
 	h_upper, h_lower := encryptorFunc(counterUpper, counterLower)
