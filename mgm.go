@@ -38,7 +38,7 @@ func (m *MGM) NonceSize() int {
 }
 
 func (m *MGM) Overhead() int {
-	return 1 << 62
+	return 16
 }
 
 func (m *MGM) Open(dst []byte, nonce []byte, ciphertext []byte, additionalData []byte) ([]byte, error) {
