@@ -9,32 +9,24 @@ import (
 )
 
 func main() {
-	decryptor := mgmgo.NewDecryptor()
 
 	// Ключ должен быть длиной 256 бит (64 hex символа)
-	key, err := hex.DecodeString("8899AABBCCDDEEFF0011223344556677FEDCBA98765432100123456789ABCDEF")
+	key := make([]byte, 32)
+	mgm, err := mgmgo.New(key)
 	if err != nil {
-		log.Fatalf("Error during key decoding: %s", err)
+		log.Fatalf("Error during encryptor creation: %s", err)
 	}
-	nonce, err := hex.DecodeString("00000000000000000000000000000001")
+	nonce := make([]byte, mgm.NonceSize())
+
+	additionalData := []byte("your-additional-data")
+	ciphertext, _ := hex.DecodeString("705007f92ecfb7cffaf6f009")
+	mac, _ := hex.DecodeString("aaa6ba3c301c5194fddfee4f7a413a10")
+
+	result, err := mgm.Open(ciphertext[:0], nonce, append(ciphertext, mac...), additionalData)
+
 	if err != nil {
-		log.Fatalf("Error during nonce decoding: %s", err)
-	}
-	associatedData := []byte("your-associated-data")
-	ciphertext, err := hex.DecodeString("5c44d197d9aa123feb46d896")
-	if err != nil {
-		log.Fatalf("Error during ciphertext decoding: %s", err)
-	}
-	mac, err := hex.DecodeString("5f11114a5ee24fdd5085d6ca11a249fe")
-	if err != nil {
-		log.Fatalf("Error during mac decoding: %s", err)
+		log.Fatalf("Error: MACs are different")
 	}
 
-	// if MAC authentication fails, an ErrMACsDiffer will be returned
-	plaintext, err := decryptor.Decrypt(key, nonce, associatedData, ciphertext, mac)
-	if err != nil {
-		log.Fatalf("Decryption failed: %s", err)
-	}
-
-	fmt.Printf("Plaintext: %s\n", string(plaintext))
+	fmt.Printf("Plaintext: %s\n", string(result))
 }

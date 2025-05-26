@@ -1,4 +1,2 @@
-github.com/ChainsAre2Tight/kuznechik-go v1.1.0 h1:mgT9c0F1GnVP6ZEFppoCU33upEJwXJcvzqLcAQZ9TZs=
-github.com/ChainsAre2Tight/kuznechik-go v1.1.0/go.mod h1:x4TYlqT25dv+cETdQNaFLE6GKN0npKFb3ndaYbLNfPE=
-golang.org/x/sync v0.14.0 h1:woo0S4Yywslg6hp4eUFjTVOyKt0RookbpAHG4c1HmhQ=
-golang.org/x/sync v0.14.0/go.mod h1:1dzgHSNfp02xaA81J2MS99Qcpr2w7fw1gpm99rleRqA=
+github.com/ChainsAre2Tight/kuznechik-go v1.2.0 h1:/pveaTSd++RJ3M7za648VNBV0QxmgUii8BfQOTGYY5c=
+github.com/ChainsAre2Tight/kuznechik-go v1.2.0/go.mod h1:x4TYlqT25dv+cETdQNaFLE6GKN0npKFb3ndaYbLNfPE=
